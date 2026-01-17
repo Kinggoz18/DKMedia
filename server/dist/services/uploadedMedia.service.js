@@ -1,0 +1,130 @@
+import { ObjectId } from "@fastify/mongodb";
+import { UploadedMediaModel } from "../schema/uploadedMedia.js";
+import { ReplyError } from "../interfaces/ReplyError.js";
+export class UploadedMediaService {
+    constructor(dbCollection, logger, r2BucketManager) {
+        this.dbModel = UploadedMediaModel;
+        /**
+         * Upload a new media
+         * @param request
+         * @param reply
+         * @returns
+         */
+        this.addMedia = async (request, reply) => {
+            try {
+                const { mediaType, mediaLink, eventTag, hashtags, caption, } = request.body;
+                // Validate the uploaded media
+                const media = new this.dbModel({
+                    mediaType,
+                    mediaLink,
+                    eventTag,
+                    hashtags: hashtags || [],
+                    caption: caption || "",
+                });
+                await media.validate();
+                const savedMedia = await this.dbCollection.insertOne(media);
+                const getSavedMedia = await this.dbCollection.findOne({ _id: savedMedia?.insertedId });
+                if (!getSavedMedia) {
+                    throw new ReplyError("Failed to save media", 400);
+                }
+                return reply.code(201).send({ data: getSavedMedia, success: true });
+            }
+            catch (error) {
+                request.log.error(error?.message);
+                if (error instanceof ReplyError)
+                    return reply.status(error.code).send({ success: false, data: error.message });
+                else
+                    return reply.status(500).send({ success: false, data: "Sorry, something went wrong" });
+            }
+        };
+        /**
+         * Delete a media from the database
+         * Also deletes the associated media file (image/video) from Cloudflare R2
+         * @param request
+         * @param reply
+         * @returns
+         */
+        this.deleteMedia = async (request, reply) => {
+            try {
+                const { id } = request.params;
+                //Check if the media exists
+                const mediaExists = await this.dbCollection.findOne({ _id: new ObjectId(id) });
+                if (!mediaExists?._id)
+                    throw new ReplyError("Media does not exist", 404);
+                // Delete the associated media file from R2 if it exists
+                if (mediaExists.mediaLink) {
+                    try {
+                        await this.r2BucketManager.deleteSingleResource(mediaExists.mediaLink);
+                        this.logger.info(`Deleted media from R2: ${mediaExists.mediaLink}`);
+                    }
+                    catch (r2Error) {
+                        // Log the error but don't fail the deletion - the media might already be deleted
+                        this.logger.warn(`Failed to delete media from R2: ${r2Error?.message}`);
+                    }
+                }
+                //Delete the media from database
+                const deleteResult = await this.dbCollection.deleteOne({ _id: new ObjectId(id) });
+                if (deleteResult.deletedCount != 1) {
+                    throw new ReplyError("Failed to delete media", 400);
+                }
+                return reply.code(200).send({ data: "Media and associated file deleted", success: true });
+            }
+            catch (error) {
+                request.log.error(error?.message);
+                if (error instanceof ReplyError)
+                    return reply.status(error.code).send({ success: false, data: error.message });
+                else
+                    return reply.status(500).send({ success: false, data: "Sorry, something went wrong" });
+            }
+        };
+        /**
+         * Get a media by id
+         * @param request
+         * @param reply
+         * @returns
+         */
+        this.getMediaById = async (request, reply) => {
+            try {
+                const { id } = request.params;
+                const media = await this.dbCollection.findOne({ _id: new ObjectId(id) });
+                if (!media) {
+                    throw new ReplyError("Failed to get media", 400);
+                }
+                return reply.code(200).send({ data: media, success: true });
+            }
+            catch (error) {
+                request.log.error(error?.message);
+                if (error instanceof ReplyError)
+                    return reply.status(error.code).send({ success: false, data: error.message });
+                else
+                    return reply.status(500).send({ success: false, data: "Sorry, something went wrong" });
+            }
+        };
+        /**
+         * Get all media
+         * @param request
+         * @param reply
+         * @returns
+         */
+        this.getAllMedia = async (request, reply) => {
+            try {
+                const allMedia = await this.dbCollection.find({}).toArray();
+                return reply.code(200).send({ data: allMedia, success: true });
+            }
+            catch (error) {
+                request.log.error(error?.message);
+                return reply.status(500).send({ success: false, data: "Sorry, something went wrong" });
+            }
+        };
+        this.dbCollection = dbCollection;
+        this.logger = logger;
+        this.r2BucketManager = r2BucketManager;
+        if (!dbCollection) {
+            logger.error("Failed to load uploaded media collection");
+            return;
+        }
+        if (!r2BucketManager) {
+            throw new Error("CloudflareR2BucketManager is missing");
+        }
+    }
+}

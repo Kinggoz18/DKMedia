@@ -1,0 +1,495 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Palanquin:wght@100;200;300;400;500;600;700&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import "tailwindcss";
+@import "tailwindcss-animated";
+
+@theme {
+  /* Midnight Luxury Palette */
+  --color-ebony: #050505;
+  --color-charcoal: #121212;
+  --color-graphite: #1a1a1a;
+  --color-smoke: #2a2a2a;
+  --color-gold: #c9a962;
+  --color-gold-muted: rgba(201, 169, 98, 0.7);
+  --color-chrome: #a8a8a8;
+  
+  --color-background-prime: #050505;
+  --color-primary-500: #c9a962;
+  --color-primary-600: rgba(201, 169, 98, 0.85);
+  --color-section: #0a0a0a;
+  
+  --animate-spin-slow: spin 2s linear infinite;
+  
+  /* Typography */
+  --font-Serif: "Cormorant Garamond", Georgia, serif;
+  --font-Sans: "Montserrat", sans-serif;
+  --font-Bebas: "Bebas Neue", sans-serif;
+  --font-Poppins: "Poppins", sans-serif;
+  --font-Palanquin: "Palanquin", sans-serif;
+}
+
+/************************************************* {Animation keyframes} *************************************************/
+@keyframes spin {
+
+  0%,
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+html {
+  height: 100%;
+  min-height: 100%;
+  width: 100%;
+  min-width: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  height: 100%;
+  width: 100%;
+  margin: 0;
+}
+
+#root {
+  height: 100%;
+  width: 100%;
+}
+
+/************************************************* component class *************************************************/
+@layer components {
+
+  /************************************************* Luxury Typography *************************************************/
+  .h1-luxury {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    @apply text-4xl sm:text-5xl lg:text-6xl font-light tracking-wide;
+    color: #c9a962;
+  }
+
+  .h2-luxury {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    @apply text-3xl sm:text-4xl lg:text-5xl font-light tracking-wide;
+    color: #c9a962;
+  }
+
+  .h3-luxury {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    @apply text-xl sm:text-2xl lg:text-3xl font-normal tracking-wide;
+    color: #c9a962;
+  }
+
+  .text-luxury {
+    font-family: "Montserrat", sans-serif;
+    @apply text-sm sm:text-base tracking-wider leading-relaxed;
+    color: #a8a8a8;
+  }
+
+  .text-luxury-sm {
+    font-family: "Montserrat", sans-serif;
+    @apply text-xs sm:text-sm tracking-widest uppercase;
+    color: rgba(168, 168, 168, 0.7);
+  }
+
+  /* Legacy typography support */
+  .h1-small {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    @apply text-3xl sm:text-4xl font-light tracking-wide;
+    color: #c9a962;
+  }
+
+  .h2-small {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    @apply text-2xl sm:text-3xl font-light tracking-wide;
+    color: #c9a962;
+  }
+
+  .h3-small {
+    font-family: "Montserrat", sans-serif;
+    @apply text-lg sm:text-xl lg:text-2xl font-medium tracking-wide;
+    color: #c9a962;
+  }
+
+  .h4-small {
+    font-family: "Montserrat", sans-serif;
+    @apply text-base sm:text-lg font-normal tracking-wide;
+    color: rgba(201, 169, 98, 0.8);
+  }
+
+  .h2-large {
+    font-family: "Cormorant Garamond", Georgia, serif;
+    @apply text-4xl lg:text-5xl font-light tracking-wide;
+    color: #c9a962;
+  }
+
+  /* Body text sizes */
+  .text-body {
+    font-family: "Montserrat", sans-serif;
+    @apply text-sm sm:text-base leading-relaxed tracking-wide;
+  }
+
+  .text-body-lg {
+    font-family: "Montserrat", sans-serif;
+    @apply text-base sm:text-lg leading-relaxed tracking-wide;
+  }
+}
+
+/************************************************* Z-Index System *************************************************/
+/* 
+  Z-Index Hierarchy:
+  z-content: 10       - Main content
+  z-sidebar: 20       - Sidebar navigation
+  z-overlay: 30       - Overlay backgrounds
+  z-popup: 40         - Popup modals
+  z-loading: 50       - Loading indicators
+  z-toast: 60         - Toast notifications
+*/
+
+/************************************************* Scrollbar styling *************************************************/
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(64 64 64) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: rgb(64 64 64);
+  border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(82 82 82);
+}
+
+.scrollbar-thumb-neutral-700::-webkit-scrollbar-thumb {
+  background-color: rgb(64 64 64);
+}
+
+.scrollbar-track-transparent::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/************************************************* Luxury Glass Effect - Smoke & Glass *************************************************/
+.glass-dark {
+  background: rgba(5, 5, 5, 0.75);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-card {
+  background: linear-gradient(145deg, rgba(18, 18, 18, 0.85), rgba(10, 10, 10, 0.92));
+  backdrop-filter: blur(20px) saturate(150%);
+  -webkit-backdrop-filter: blur(20px) saturate(150%);
+  border: 1px solid rgba(201, 169, 98, 0.08);
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.glass-luxury {
+  background: rgba(5, 5, 5, 0.6);
+  backdrop-filter: blur(30px) saturate(200%);
+  -webkit-backdrop-filter: blur(30px) saturate(200%);
+  border: 1px solid rgba(201, 169, 98, 0.1);
+  box-shadow: 
+    0 16px 48px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.glow-gold {
+  box-shadow: 0 0 30px rgba(201, 169, 98, 0.15);
+}
+
+.glow-gold-hover:hover {
+  box-shadow: 0 0 40px rgba(201, 169, 98, 0.25);
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Legacy support */
+.glow-primary {
+  box-shadow: 0 0 20px rgba(201, 169, 98, 0.2);
+}
+
+.glow-hover:hover {
+  box-shadow: 0 0 30px rgba(201, 169, 98, 0.3);
+  transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/************************************************* Modern Input Styling *************************************************/
+.input-modern {
+  background: rgba(30, 30, 30, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  transition: all 0.3s ease;
+}
+
+.input-modern:focus {
+  border-color: rgba(220, 38, 38, 0.5);
+  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+  outline: none;
+}
+
+.input-modern::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/************************************************* Luxury Animations & Effects *************************************************/
+
+/* Slow zoom for luxury hover */
+@keyframes slowZoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+
+.hover-slow-zoom {
+  overflow: hidden;
+}
+
+.hover-slow-zoom img,
+.hover-slow-zoom video {
+  transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hover-slow-zoom:hover img,
+.hover-slow-zoom:hover video {
+  transform: scale(1.08);
+}
+
+/* Letter-spacing expansion for buttons */
+.btn-luxury {
+  font-family: "Montserrat", sans-serif;
+  letter-spacing: 0.15em;
+  transition: letter-spacing 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+              background-color 0.5s ease,
+              border-color 0.5s ease,
+              color 0.5s ease;
+}
+
+.btn-luxury:hover {
+  letter-spacing: 0.25em;
+}
+
+/* Outline button style - luxury */
+.btn-outline-luxury {
+  font-family: "Montserrat", sans-serif;
+  @apply px-8 py-4 text-sm uppercase tracking-widest font-medium;
+  background: transparent;
+  border: 1px solid rgba(201, 169, 98, 0.5);
+  color: #c9a962;
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.btn-outline-luxury:hover {
+  background: rgba(201, 169, 98, 0.1);
+  border-color: #c9a962;
+  letter-spacing: 0.2em;
+}
+
+/* Solid luxury button */
+.btn-solid-luxury {
+  font-family: "Montserrat", sans-serif;
+  @apply px-8 py-4 text-sm uppercase tracking-widest font-medium;
+  background: linear-gradient(135deg, #c9a962 0%, #a8883f 100%);
+  border: none;
+  color: #050505;
+  transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.btn-solid-luxury:hover {
+  background: linear-gradient(135deg, #d4b872 0%, #b8984f 100%);
+  letter-spacing: 0.2em;
+  box-shadow: 0 8px 30px rgba(201, 169, 98, 0.3);
+}
+
+/* Film grain overlay for images */
+.film-grain {
+  position: relative;
+}
+
+.film-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  opacity: 0.04;
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* Vignette effect */
+.vignette {
+  position: relative;
+}
+
+.vignette::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.6) 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Staggered fade animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeInSmooth {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.animate-fade-in-smooth {
+  animation: fadeInSmooth 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Stagger delays */
+.stagger-1 { animation-delay: 100ms; }
+.stagger-2 { animation-delay: 200ms; }
+.stagger-3 { animation-delay: 300ms; }
+.stagger-4 { animation-delay: 400ms; }
+.stagger-5 { animation-delay: 500ms; }
+.stagger-6 { animation-delay: 600ms; }
+.stagger-7 { animation-delay: 700ms; }
+.stagger-8 { animation-delay: 800ms; }
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Parallax container */
+.parallax-container {
+  perspective: 1px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.parallax-layer {
+  transform: translateZ(-1px) scale(2);
+}
+
+/* Luxury card hover - no scale, just glow */
+.hover-luxury {
+  transition: box-shadow 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              border-color 0.6s ease;
+}
+
+.hover-luxury:hover {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+              0 0 40px rgba(201, 169, 98, 0.1);
+  border-color: rgba(201, 169, 98, 0.2);
+}
+
+/* Shimmer loading effect */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, 
+    rgba(18, 18, 18, 0.8) 25%, 
+    rgba(42, 42, 42, 0.8) 50%, 
+    rgba(18, 18, 18, 0.8) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Subtle gold pulse */
+@keyframes goldPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(201, 169, 98, 0.15);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(201, 169, 98, 0.3);
+  }
+}
+
+.pulse-gold {
+  animation: goldPulse 3s ease-in-out infinite;
+}
+
+/* Legacy support */
+.hover-lift {
+  transition: box-shadow 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.hover-lift:hover {
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.5);
+}
+
+.pulse-glow {
+  animation: goldPulse 3s ease-in-out infinite;
+}
+
+
