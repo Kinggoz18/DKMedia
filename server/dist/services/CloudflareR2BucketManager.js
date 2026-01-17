@@ -26,7 +26,7 @@ export class CloudflareR2BucketManager {
                     Body: buffer,
                     ContentType: 'image/jpeg',
                 }));
-                const secure_url = `https://www.dkmedia305.com/dkmedia-website/${key}`;
+                const secure_url = `https://assets.dkmedia305.com/dkmedia-website/${key}`;
                 return secure_url;
             }
             catch (error) {
@@ -50,7 +50,7 @@ export class CloudflareR2BucketManager {
                     Body: buffer,
                     ContentType: 'video/mp4',
                 }));
-                const secure_url = `https://www.dkmedia305.com/dkmedia-website/${key}`;
+                const secure_url = `https://assets.dkmedia305.com/dkmedia-website/${key}`;
                 return secure_url;
             }
             catch (error) {

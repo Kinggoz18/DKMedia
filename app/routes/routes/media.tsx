@@ -42,7 +42,7 @@ export const meta: MetaFunction<typeof loader> = ({ data, location }) => {
     ],
     url: location.pathname + (tag ? `?tag=${tag}` : ""),
     type: "website",
-  }, location as any);
+  });
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {

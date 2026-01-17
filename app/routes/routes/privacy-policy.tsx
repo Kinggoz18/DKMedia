@@ -16,7 +16,7 @@ export const meta: MetaFunction = ({ location }) => {
     url: location.pathname,
     type: "website",
     noindex: true, // Privacy policies typically don't need to be indexed
-  }, location as any);
+  });
 };
 
 export default function PrivacyPolicy() {

@@ -37,7 +37,7 @@ export const meta: MetaFunction<typeof loader> = ({ location }) => {
     ],
     url: location.pathname,
     type: "website",
-  }, location as any);
+  });
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {

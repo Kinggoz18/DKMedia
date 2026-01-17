@@ -68,7 +68,7 @@ export default function Header() {
         <img 
           src="/dkMediaLogo.png" 
           alt="DKMEDIA" 
-          className="h-8 lg:h-10 cursor-pointer transition-opacity duration-500 hover:opacity-80" 
+          className="lg:h-[80px] cursor-pointer transition-opacity duration-500 hover:opacity-80 h-[60px]" 
           onClick={onLogoClick} 
         />
         

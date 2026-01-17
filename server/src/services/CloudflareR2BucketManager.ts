@@ -75,7 +75,7 @@ export class CloudflareR2BucketManager {
         })
       );
 
-      const secure_url = `https://www.dkmedia305.com/dkmedia-website/${key}`;
+      const secure_url = `https://assets.dkmedia305.com/dkmedia-website/${key}`;
       return secure_url;
     } catch (error: any) {
       throw new Error(
@@ -104,7 +104,7 @@ export class CloudflareR2BucketManager {
           ContentType: 'video/mp4',
         })
       );
-      const secure_url = `https://www.dkmedia305.com/dkmedia-website/${key}`;
+      const secure_url = `https://assets.dkmedia305.com/dkmedia-website/${key}`;
       return secure_url;
     } catch (error: any) {
       throw new Error(

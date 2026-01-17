@@ -121,7 +121,7 @@ export const meta: MetaFunction<typeof loader> = ({ data, location }) => {
     image: highlightEvent?.image,
     url: location.pathname,
     type: highlightEvent ? "event" : "website",
-  }, location as any);
+  });
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {

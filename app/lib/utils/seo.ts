@@ -17,16 +17,30 @@ export interface SEOConfig {
 /**
  * Get the base URL for the site
  */
-export function getBaseUrl(request?: Request): string {
+export function getBaseUrl(request?: Request | { pathname?: string; search?: string; hash?: string }): string {
   if (typeof window !== "undefined") {
     return window.location.origin;
   }
-
+  
   if (request) {
-    const url = new URL(request.url);
-    return `${url.protocol}//${url.host}`;
+    // Check if it's a Request object with a url property
+    if (request instanceof Request) {
+      try {
+        const url = new URL(request.url);
+        return `${url.protocol}//${url.host}`;
+      } catch (e) {
+        // If URL parsing fails, fall through to default
+      }
+    } else if ((request as any).url && typeof (request as any).url === 'string') {
+      try {
+        const url = new URL((request as any).url);
+        return `${url.protocol}//${url.host}`;
+      } catch (e) {
+        // If URL parsing fails, fall through to default
+      }
+    }
   }
-
+  
   // Fallback to environment variable or default
   return process.env.SITE_URL || "https://dkmedia305.com";
 }
@@ -43,7 +57,7 @@ export function getFullUrl(path: string, request?: Request): string {
 /**
  * Generate SEO meta tags
  */
-export function generateSEOMeta(config: SEOConfig, request?: Request): ReturnType<MetaFunction> {
+export function generateSEOMeta(config: SEOConfig, request?: Request | { pathname?: string; search?: string; hash?: string }): ReturnType<MetaFunction> {
   const baseUrl = getBaseUrl(request);
   const fullUrl = config.url || baseUrl;
   const imageUrl = config.image

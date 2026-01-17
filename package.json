@@ -13,12 +13,12 @@
     "build:all": "npm run build:client && npm run build:server",
     "start": "node server/dist/index.js",
     "rebuild": "npm run build:client && npm run build:server && npm start",
+    "vpsrebuild": "npm run build:client && npm run build:server && pm2 start npm --name \"dk-media-app\" -- start",
     "preview": "vite preview",
     "lint": "eslint ."
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.970.0",
-    "framer-motion": "^11.0.0",
     "@emailjs/nodejs": "^5.0.2",
     "@fastify/cors": "^11.0.0",
     "@fastify/mongodb": "^9.0.2",
@@ -37,6 +37,7 @@
     "cloudinary": "^2.6.0",
     "dotenv": "^16.4.7",
     "fastify": "^5.2.1",
+    "framer-motion": "^11.0.0",
     "isbot": "^5.1.23",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.10.1",
@@ -77,5 +78,10 @@
     "typescript": "^5.7.3",
     "typescript-eslint": "^8.24.1",
     "vite": "^5.4.0"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.21.3",
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.1.18",
+    "lightningcss-linux-x64-gnu": "^1.30.2"
   }
 }

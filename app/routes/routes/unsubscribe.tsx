@@ -18,7 +18,7 @@ export const meta: MetaFunction = ({ location }) => {
     url: location.pathname,
     type: "website",
     noindex: true, // Unsubscribe pages typically don't need to be indexed
-  }, location as any);
+  });
 };
 
 export async function action({ request }: ActionFunctionArgs) {
