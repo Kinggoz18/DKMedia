@@ -181,6 +181,8 @@ export async function clientLoader({ request }: ClientLoaderFunctionArgs) {
     };
   }
 }
+// Enable clientLoader to run on initial page load/hydration
+clientLoader.hydrate = true;
 
 // HydrateFallback: Show loading state while clientLoader runs
 export function HydrateFallback() {

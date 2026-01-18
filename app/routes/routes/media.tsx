@@ -10,8 +10,9 @@ import { generateSEOMeta } from '@/lib/utils/seo';
 
 export const meta: MetaFunction<typeof loader> = ({ data, location }) => {
   // Extract tag from URL for SEO purposes (server-side)
-  const url = new URL(location.pathname + location.search);
-  const tag = url.searchParams.get('tag') || null;
+  // Use URLSearchParams directly instead of constructing URL from path
+  const searchParams = new URLSearchParams(location.search);
+  const tag = searchParams.get('tag') || null;
   
   const title = tag 
     ? `${tag.charAt(0).toUpperCase() + tag.slice(1)} Recaps | DKMEDIA305 Media Gallery`
@@ -94,6 +95,8 @@ export async function clientLoader({ request }: ClientLoaderFunctionArgs) {
     return { contact: null, initialTag: null };
   }
 }
+// Enable clientLoader to run on initial page load/hydration
+clientLoader.hydrate = true;
 
 // HydrateFallback: Show loading state while clientLoader runs
 export function HydrateFallback() {
