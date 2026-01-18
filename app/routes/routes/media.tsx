@@ -1,5 +1,6 @@
 import { useLoaderData, useSearchParams } from "@remix-run/react";
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { ClientLoaderFunctionArgs } from "@remix-run/react";
 import Header from '@/components/public/Header';
 import Newsletter from '@/components/public/Newsletter';
 import Contact from '@/components/public/Contact';
@@ -8,7 +9,9 @@ import { ContactService } from '@/services/ContactService';
 import { generateSEOMeta } from '@/lib/utils/seo';
 
 export const meta: MetaFunction<typeof loader> = ({ data, location }) => {
-  const tag = data?.initialTag;
+  // Extract tag from URL for SEO purposes (server-side)
+  const url = new URL(location.pathname + location.search);
+  const tag = url.searchParams.get('tag') || null;
   
   const title = tag 
     ? `${tag.charAt(0).toUpperCase() + tag.slice(1)} Recaps | DKMEDIA305 Media Gallery`
@@ -43,7 +46,19 @@ export const meta: MetaFunction<typeof loader> = ({ data, location }) => {
   });
 };
 
+// Server-side loader: Only return minimal SEO data, no API calls
 export async function loader({ request }: LoaderFunctionArgs) {
+  // Get tag from URL params for SEO
+  const url = new URL(request.url);
+  const initialTag = url.searchParams.get('tag') || null;
+
+  // Return minimal data for SEO meta tags only
+  // All data fetching moved to clientLoader
+  return { initialTag };
+}
+
+// Client-side loader: Perform all API calls in the browser
+export async function clientLoader({ request }: ClientLoaderFunctionArgs) {
   const contactService = new ContactService();
   
   // Get tag from URL params
@@ -80,8 +95,23 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
 }
 
+// HydrateFallback: Show loading state while clientLoader runs
+export function HydrateFallback() {
+  return (
+    <>
+      <Header />
+      <main className="bg-[#0a0a0a] w-full min-h-screen relative">
+        <Newsletter />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
+        </div>
+      </main>
+    </>
+  );
+}
+
 export default function MediaPage() {
-  const { contact, initialTag } = useLoaderData<typeof loader>();
+  const { contact, initialTag } = useLoaderData<typeof clientLoader>();
 
   return (
     <>

@@ -1,5 +1,6 @@
 import { useLoaderData } from "@remix-run/react";
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { ClientLoaderFunctionArgs } from "@remix-run/react";
 import Header from '@/components/public/Header';
 import ContactUs from '@/components/public/ContactUs';
 import Contact from '@/components/public/Contact';
@@ -40,7 +41,15 @@ export const meta: MetaFunction<typeof loader> = ({ location }) => {
   });
 };
 
+// Server-side loader: Only return minimal SEO data, no API calls
 export async function loader({ request }: LoaderFunctionArgs) {
+  // Return minimal data for SEO meta tags only
+  // All data fetching moved to clientLoader
+  return {};
+}
+
+// Client-side loader: Perform all API calls in the browser
+export async function clientLoader({ request }: ClientLoaderFunctionArgs) {
   const contactService = new ContactService();
 
   // Handle API errors gracefully - return empty/default data if API fails
@@ -64,8 +73,22 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
 }
 
+// HydrateFallback: Show loading state while clientLoader runs
+export function HydrateFallback() {
+  return (
+    <>
+      <Header />
+      <main className="bg-[#0a0a0a] w-full min-h-screen relative">
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
+        </div>
+      </main>
+    </>
+  );
+}
+
 export default function ContactPage() {
-  const { contact } = useLoaderData<typeof loader>();
+  const { contact } = useLoaderData<typeof clientLoader>();
 
   return (
     <>

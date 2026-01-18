@@ -1,5 +1,6 @@
 import { useLoaderData } from "@remix-run/react";
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import type { ClientLoaderFunctionArgs } from "@remix-run/react";
 import Header from '@/components/public/Header';
 import Newsletter from '@/components/public/Newsletter';
 import AbousUs from '@/components/public/AbousUs';
@@ -42,16 +43,13 @@ function getUpcomingEvents(events: IEvent[]) {
   return upcoming;
 }
 
-export const meta: MetaFunction<typeof loader> = ({ data, location }) => {
-  const highlightEvent = data?.upcomingHighlights?.[0];
-  const description = highlightEvent
-    ? `Join us for ${highlightEvent.title} - ${new Date(highlightEvent.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}. Experience premier nightlife events with DKMEDIA305 across major US party cities.`
-    : "DKMEDIA305 - Curating exclusive nightlife experiences for the discerning few across Miami, Atlanta, Houston, Dallas, Texas, Philadelphia, Florida, and more. Discover upcoming events, recaps, and join the premier entertainment community.";
+export const meta: MetaFunction<typeof loader> = ({ location }) => {
+  // Meta function for SEO - minimal server-side data only
+  // We don't have data from loader anymore, so use default values
+  const description = "DKMEDIA305 - Curating exclusive nightlife experiences for the discerning few across Miami, Atlanta, Houston, Dallas, Texas, Philadelphia, Florida, and more. Discover upcoming events, recaps, and join the premier entertainment community.";
 
   return generateSEOMeta({
-    title: highlightEvent
-      ? `${highlightEvent.title} | DKMEDIA305 - Premier Nightlife Events`
-      : "DKMEDIA305 - Premier Nightlife & Event Management Across Major US Cities",
+    title: "DKMEDIA305 - Premier Nightlife & Event Management Across Major US Cities",
     description,
     keywords: [
       "Dkmedia",
@@ -117,20 +115,26 @@ export const meta: MetaFunction<typeof loader> = ({ data, location }) => {
       "Afrobeats strip club party",
       "Stripclub party",
     ],
-    image: highlightEvent?.image,
     url: location.pathname,
-    type: highlightEvent ? "event" : "website",
+    type: "website",
   });
 };
 
+// Server-side loader: Only return minimal SEO data, no API calls
 export async function loader({ request }: LoaderFunctionArgs) {
+  // Return minimal data for SEO meta tags only
+  // All data fetching moved to clientLoader
+  return {};
+}
+
+// Client-side loader: Perform all API calls in the browser
+export async function clientLoader({ request }: ClientLoaderFunctionArgs) {
   const aboutUsService = new AboutUsService();
   const articlesService = new ArticleService();
   const eventService = new EventService();
   const contactService = new ContactService();
 
   // Handle API errors gracefully - return empty/default data if API fails
-  // Wrap each service call to catch all errors including 522 timeouts
   async function safeApiCall<T>(apiCall: () => Promise<T>, fallback: T): Promise<T> {
     try {
       return await apiCall();
@@ -178,8 +182,23 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
 }
 
+// HydrateFallback: Show loading state while clientLoader runs
+export function HydrateFallback() {
+  return (
+    <>
+      <Header />
+      <main className="bg-[#0a0a0a] w-full min-h-screen relative grid grid-flow-row pt-[100px]">
+        <Newsletter />
+        <div className="flex items-center justify-center min-h-[400px]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold"></div>
+        </div>
+      </main>
+    </>
+  );
+}
+
 export default function HomePage() {
-  const { aboutUs, articles, upcomingEvents, upcomingHighlights, contact } = useLoaderData<typeof loader>();
+  const { aboutUs, articles, upcomingEvents, upcomingHighlights, contact } = useLoaderData<typeof clientLoader>();
   const highlightEvent = upcomingHighlights?.[0];
 
   // Generate structured data
