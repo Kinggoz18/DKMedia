@@ -10,7 +10,6 @@ import UpcomingEvent from '@/components/public/UpcomingEvent';
 import AboutUsService from '@/services/AboutUsService';
 import { ArticleService } from '@/services/ArticleService';
 import EventService from '@/services/EventService';
-import MediaService from '@/services/MediaService';
 import { ContactService } from '@/services/ContactService';
 import IAboutUs from '@/lib/interfaces/IAboutUs';
 import IArticle from '@/lib/interfaces/IArticle';
@@ -128,7 +127,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const aboutUsService = new AboutUsService();
   const articlesService = new ArticleService();
   const eventService = new EventService();
-  const mediaService = new MediaService();
   const contactService = new ContactService();
 
   // Handle API errors gracefully - return empty/default data if API fails
@@ -144,11 +142,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
 
   try {
-    const [aboutUs, articles, allEvents, allMedia, contact] = await Promise.allSettled([
+    const [aboutUs, articles, allEvents, contact] = await Promise.allSettled([
       safeApiCall(() => aboutUsService.getAboutUs(), null),
       safeApiCall(() => articlesService.getAllArticle(), [] as IArticle[]),
       safeApiCall(() => eventService.getAllEvents(), [] as IEvent[]),
-      safeApiCall(() => mediaService.getAllMedia(), [] as any),
       safeApiCall(() => contactService.getContacts(), null),
     ]);
 
@@ -156,7 +153,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
     const aboutUsResult = aboutUs.status === 'fulfilled' ? aboutUs.value : null;
     const articlesResult = articles.status === 'fulfilled' ? articles.value : [] as IArticle[];
     const allEventsResult = allEvents.status === 'fulfilled' ? allEvents.value : [] as IEvent[];
-    const allMediaResult = allMedia.status === 'fulfilled' ? (allMedia.value || []) : [];
     const contactResult = contact.status === 'fulfilled' ? contact.value : null;
 
     const upcomingEvents = getUpcomingEvents(allEventsResult || []);
@@ -167,7 +163,6 @@ export async function loader({ request }: LoaderFunctionArgs) {
       articles: Array.isArray(articlesResult) ? articlesResult : [],
       upcomingEvents: Array.isArray(upcomingEvents) ? upcomingEvents : [],
       upcomingHighlights: Array.isArray(upcomingHighlights) ? upcomingHighlights : [],
-      allMedia: Array.isArray(allMediaResult) ? allMediaResult : [],
       contact: contactResult,
     };
   } catch (error) {
@@ -178,14 +173,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
       articles: [],
       upcomingEvents: [],
       upcomingHighlights: [],
-      allMedia: [],
       contact: null,
     };
   }
 }
 
 export default function HomePage() {
-  const { aboutUs, articles, upcomingEvents, upcomingHighlights, allMedia, contact } = useLoaderData<typeof loader>();
+  const { aboutUs, articles, upcomingEvents, upcomingHighlights, contact } = useLoaderData<typeof loader>();
   const highlightEvent = upcomingHighlights?.[0];
 
   // Generate structured data
@@ -235,7 +229,7 @@ export default function HomePage() {
           upcomingEvents={upcomingEvents}
           upcomingHighlights={upcomingHighlights}
         />
-        <Recaps allRecaps={allMedia} />
+        <Recaps />
         {aboutUs && <AbousUs aboutUs={aboutUs} />}
         <Articles articles={articles} />
       </main>

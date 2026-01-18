@@ -1,11 +1,28 @@
 import { mediaType } from '@/lib/enums/mediaType';
 import useIntersectionObserverHook from '@/lib/hooks/IntersectionObserverHook';
-import { RecapsProps } from '@/lib/interfaces/props/RecapsProps'
 import { Link } from '@remix-run/react';
-import { useMemo } from 'react'
+import { useMemo, useEffect, useState } from 'react';
+import MediaService from '@/services/MediaService';
+import IMedia from '@/lib/interfaces/IMedia';
 
-export default function Recaps(props: RecapsProps) {
-  const { allRecaps } = props;
+export default function Recaps() {
+  const [allRecaps, setAllRecaps] = useState<IMedia[]>([]);
+
+  // Fetch media client-side
+  useEffect(() => {
+    async function fetchMedia() {
+      try {
+        const mediaService = new MediaService();
+        const media = await mediaService.getAllMedia();
+        setAllRecaps(Array.isArray(media) ? media : []);
+      } catch (error: any) {
+        console.error('Failed to fetch media:', error);
+        setAllRecaps([]);
+      }
+    }
+
+    fetchMedia();
+  }, []);
 
   const safeRecaps = Array.isArray(allRecaps) ? allRecaps : [];
   const displayRecaps = safeRecaps.slice(0, 8);

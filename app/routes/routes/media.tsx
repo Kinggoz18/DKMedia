@@ -4,21 +4,19 @@ import Header from '@/components/public/Header';
 import Newsletter from '@/components/public/Newsletter';
 import Contact from '@/components/public/Contact';
 import Media from '@/components/public/Media';
-import MediaService from '@/services/MediaService';
 import { ContactService } from '@/services/ContactService';
 import { generateSEOMeta } from '@/lib/utils/seo';
 
 export const meta: MetaFunction<typeof loader> = ({ data, location }) => {
   const tag = data?.initialTag;
-  const mediaCount = data?.allMedia?.length || 0;
   
   const title = tag 
     ? `${tag.charAt(0).toUpperCase() + tag.slice(1)} Recaps | DKMEDIA305 Media Gallery`
     : "Media Gallery & Event Recaps | DKMEDIA305";
   
   const description = tag
-    ? `Browse ${mediaCount} ${tag} recaps and photos from DKMEDIA305 events. Relive the best moments from premier nightlife experiences across Miami, Atlanta, Houston, Dallas, Texas, Philadelphia, Florida, and more.`
-    : `Explore our media gallery featuring ${mediaCount} photos and recaps from exclusive DKMEDIA305 events. Experience premier nightlife across Miami, Atlanta, Houston, Dallas, Texas, Philadelphia, Florida, and more through our curated collection.`;
+    ? `Browse ${tag} recaps and photos from DKMEDIA305 events. Relive the best moments from premier nightlife experiences across Miami, Atlanta, Houston, Dallas, Texas, Philadelphia, Florida, and more.`
+    : `Explore our media gallery featuring photos and recaps from exclusive DKMEDIA305 events. Experience premier nightlife across Miami, Atlanta, Houston, Dallas, Texas, Philadelphia, Florida, and more through our curated collection.`;
 
   return generateSEOMeta({
     title,
@@ -46,7 +44,6 @@ export const meta: MetaFunction<typeof loader> = ({ data, location }) => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const mediaService = new MediaService();
   const contactService = new ContactService();
   
   // Get tag from URL params
@@ -65,36 +62,33 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
 
   try {
-    const [allMedia, contact] = await Promise.allSettled([
-      safeApiCall(() => mediaService.getAllMedia(), [] as any[]),
+    const [contact] = await Promise.allSettled([
       safeApiCall(() => contactService.getContacts(), null),
     ]);
 
     // Extract values from Promise.allSettled results
-    const allMediaResult = allMedia.status === 'fulfilled' ? allMedia.value : [] as any[];
     const contactResult = contact.status === 'fulfilled' ? contact.value : null;
 
     return { 
-      allMedia: Array.isArray(allMediaResult) ? allMediaResult : [], 
       contact: contactResult,
       initialTag
     };
   } catch (error) {
     // Final fallback if something unexpected happens
     console.error('Error loading media page data:', error);
-    return { allMedia: [] as any[], contact: null, initialTag: null };
+    return { contact: null, initialTag: null };
   }
 }
 
 export default function MediaPage() {
-  const { allMedia, contact, initialTag } = useLoaderData<typeof loader>();
+  const { contact, initialTag } = useLoaderData<typeof loader>();
 
   return (
     <>
       <Header />
       <main className="bg-[#0a0a0a] w-full min-h-screen relative">
         <Newsletter />
-        <Media allMedia={allMedia} initialTag={initialTag} />
+        <Media initialTag={initialTag} />
       </main>
       {contact && <Contact contact={contact} />}
     </>

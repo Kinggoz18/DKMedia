@@ -13,8 +13,7 @@
     "build:all": "npm run build:client && npm run build:server",
     "start": "node server/dist/index.js",
     "rebuild": "npm run build:client && npm run build:server && npm start",
-    "vpsrebuild": "npm run build:client && npm run build:server && pm2 start npm --name \"dk-media-app\" -- start",
-    "preview": "vite preview",
+"vpsrebuild": "npm run build:client && npm run build:server && pm2 delete dk-media-app || true && NODE_OPTIONS='--max-old-space-size=450 --expose-gc' pm2 start server/dist/index.js --name 'dk-media-app' --max-memory-restart 550M",    "preview": "vite preview",
     "lint": "eslint ."
   },
   "dependencies": {

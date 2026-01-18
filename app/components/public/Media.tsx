@@ -1,16 +1,39 @@
 import { mediaType } from "@/lib/enums/mediaType";
 import MediaPageProps from "@/lib/interfaces/props/MediaPageProps";
 import { useState, useMemo, useEffect } from "react";
+import MediaService from "@/services/MediaService";
+import IMedia from "@/lib/interfaces/IMedia";
 
 export default function Media(props: MediaPageProps) {
-  const { allMedia, initialTag } = props;
+  const { initialTag } = props;
 
-  // Ensure allMedia is always an array to prevent crashes
-  const safeMedia = Array.isArray(allMedia) ? allMedia : [];
-
+  const [allMedia, setAllMedia] = useState<IMedia[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<'all' | 'images' | 'videos'>('all');
   const [selectedTag, setSelectedTag] = useState<string | null>(initialTag || null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Fetch media client-side
+  useEffect(() => {
+    async function fetchMedia() {
+      try {
+        setIsLoading(true);
+        const mediaService = new MediaService();
+        const media = await mediaService.getAllMedia();
+        setAllMedia(Array.isArray(media) ? media : []);
+      } catch (error: any) {
+        console.error('Failed to fetch media:', error);
+        setAllMedia([]);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchMedia();
+  }, []);
+
+  // Ensure allMedia is always an array to prevent crashes
+  const safeMedia = Array.isArray(allMedia) ? allMedia : [];
 
   // Update selected tag when initialTag changes (from URL)
   useEffect(() => {
