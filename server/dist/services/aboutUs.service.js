@@ -15,7 +15,6 @@ export class AboutUsService {
                 const aboutUs = new this.dbModel({ title, paragraphs });
                 await aboutUs.validate();
                 const currentAboutUs = await this.dbCollection.findOne({});
-                console.error({ currentAboutUs });
                 //If there is no about us
                 if (!currentAboutUs) {
                     const updateAboutUs = await this.dbCollection.insertOne(aboutUs);
@@ -29,7 +28,6 @@ export class AboutUsService {
                 else {
                     //Update the values
                     const updatedTitle = title === "" ? currentAboutUs.title : title;
-                    console.error({ updatedTitle, paragraphs });
                     // Insert the new update
                     const updateAboutUs = await this.dbCollection.updateOne({ _id: currentAboutUs?._id }, {
                         $set: {

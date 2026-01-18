@@ -61,7 +61,6 @@ const getExpiryTime = (expireAt) => {
         .toLocaleLowerCase();
     const duration = parseInt(expireAt.substring(0, expireAt.length - 1));
     if (isNaN(duration)) {
-        console.log('Invalid duration value. Returning default expiry.');
         return 60 * 1000; // Default to 1 minute
     }
     switch (durationFormat) {
@@ -74,7 +73,6 @@ const getExpiryTime = (expireAt) => {
         case 'd':
             return 60 * 60 * 24 * duration * 1000;
         default:
-            console.log('Invalid format. Returning default expiry.');
             return 60 * 1000; // Default to 1 minute
     }
 };
@@ -83,7 +81,6 @@ const verifyToken = (token) => {
         return jwt.verify(token, JWT_SECRET);
     }
     catch (error) {
-        console.log('Error while verifying token', error.message);
         return error.message;
     }
 };

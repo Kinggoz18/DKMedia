@@ -5,7 +5,6 @@ import { ObjectId } from "@fastify/mongodb";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 dotenv.config();
 const PassportConfig = (sevrer, database) => {
-    console.log("Initalizing passport...");
     sevrer.register(fastifyPassport.initialize());
     sevrer.register(fastifyPassport.secureSession());
     const googleClientId = process.env.GOOGLE_CLIENT_ID;
@@ -24,7 +23,6 @@ const PassportConfig = (sevrer, database) => {
         passReqToCallback: true, // Pass the request to the callback to access query parameters
         scope: ['profile', 'email'],
     }, async function (req, accessToken, refreshToken, profile, cb) {
-        console.log("Calling google strategy");
         try {
             const request = req;
             const state = request.query.state ? JSON.parse(request.query.state) : {};
@@ -32,38 +30,31 @@ const PassportConfig = (sevrer, database) => {
             const searchUser = await authCollection.findOne({
                 authId: profile.id,
             });
-            console.log({ mode, id, profile });
             // Handle login scenario
             if (mode === "login") {
                 // The user does not exist
                 if (!searchUser) {
-                    console.log("Google account not registered for login");
                     return cb(null, { userId: false, mode, erroMessage: "Google account not registered" });
                 }
-                console.log("Login successful");
                 return cb(null, { userId: searchUser?.authId, mode });
             }
             // Handle signup scenario
             if (mode === "signup") {
                 //The user already exists
                 if (searchUser) {
-                    console.log("Google account already registered for signup");
                     return cb(null, { userId: false, mode, erroMessage: "Google account already registered" });
                 }
                 if (!id) {
-                    console.log("Auth session not found");
                     return cb(null, { userId: false, mode, erroMessage: "Auth session not found" });
                 }
                 const userId = decodeURIComponent(id);
                 const authSession = await authSessionCollection.findOne({ _id: new ObjectId(userId) });
                 if (!authSession || !authSession?._id) {
-                    console.log("Auth session not found");
                     return cb(null, { userId: false, mode, erroMessage: "Auth session not found" });
                 }
                 const currentDate = new Date();
                 //If the session has not expired
                 if (authSession?.expires < currentDate) {
-                    console.log("Session expired. Please signup again");
                     return cb(null, { userId: false, mode, erroMessage: "Session expired. Please signup again" });
                 }
                 //Create the new user
@@ -81,7 +72,6 @@ const PassportConfig = (sevrer, database) => {
             return cb(null, { userId: false, mode, erroMessage: "Invalid mode" });
         }
         catch (error) {
-            console.log("Error in Google Passport authentication", error);
             return cb(null, { userId: false, mode: "login", erroMessage: error.message ?? error });
         }
     }));

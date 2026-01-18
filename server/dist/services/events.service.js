@@ -189,7 +189,6 @@ export class EventService {
             }
             catch (error) {
                 request.log.error(error?.message);
-                console.error('Image Upload Error:', error);
                 return reply.status(500).send({ success: false, data: "Image upload failed" });
             }
         };
@@ -214,7 +213,6 @@ export class EventService {
             }
             catch (error) {
                 request.log.error(error?.message);
-                console.error('Video Upload Error:', error);
                 return reply.status(500).send({ success: false, data: "Video upload failed" });
             }
         };

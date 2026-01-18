@@ -16,12 +16,10 @@ export class UploadMediaRoute {
         const userCollection = database.collection('auth');
         this.protectMiddleware = createProtectMiddleware(authCodeCollection, userCollection);
         if (!this.server) {
-            console.error("Error: Failed to load server");
             this.logger.error("Failed to load server");
             return;
         }
         if (!this.collection) {
-            console.error("Error: Failed to load uploaded media collection");
             this.logger.error("Failed to load uploaded media collection");
             return;
         }
@@ -30,7 +28,6 @@ export class UploadMediaRoute {
         // Initialize service with R2BucketManager
         this.service = new UploadedMediaService(this.collection, logger, r2BucketManager);
         if (!this.service) {
-            console.error("Error: Failed to load uploaded media service");
             this.logger.error("Failed to load uploaded media service");
             return;
         }
@@ -90,7 +87,6 @@ export class UploadMediaRoute {
             }, { prefix: this.basePath });
         }
         catch (error) {
-            console.error({ error });
             this.logger.error({ error });
             return;
         }

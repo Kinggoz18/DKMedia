@@ -14,17 +14,14 @@ export class NewsletterHistoryRoute {
         const userCollection = database.collection('auth');
         this.protectMiddleware = createProtectMiddleware(authCodeCollection, userCollection);
         if (!this.server) {
-            console.error("Error: Failed to load server");
             this.logger.error("Failed to load server");
             return;
         }
         if (!this.collection) {
-            console.error("Error: Failed to load newsletter history collection");
             this.logger.error("Failed to load newsletter history collection");
             return;
         }
         if (!this.service) {
-            console.error("Error: Failed to load newsletter history service");
             this.logger.error("Failed to load newsletter history service");
             return;
         }
@@ -70,7 +67,6 @@ export class NewsletterHistoryRoute {
             }, { prefix: this.basePath });
         }
         catch (error) {
-            console.error({ error });
             this.logger.error({ error });
             return;
         }

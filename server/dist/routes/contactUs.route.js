@@ -15,17 +15,14 @@ export class ContactUsRoute {
         const userCollection = database.collection('auth');
         this.protectMiddleware = createProtectMiddleware(authCodeCollection, userCollection);
         if (!this.server) {
-            console.error("Error: Failed to load server");
             this.logger.error("Failed to load server");
             return;
         }
         if (!this.collection) {
-            console.error("Error: Failed to load contacts collection");
             this.logger.error("Failed to load contacts collection");
             return;
         }
         if (!this.service) {
-            console.error("Error: Failed to load contacts service");
             this.logger.error("Failed to load contacts service");
             return;
         }
@@ -98,7 +95,6 @@ export class ContactUsRoute {
             }, { prefix: this.basePath });
         }
         catch (error) {
-            console.error({ error });
             this.logger.error({ error });
             return;
         }
