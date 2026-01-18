@@ -54,7 +54,6 @@ const connectToDatabase = async () => {
     // Connect Mongoose (needed for EmailTransportModel and ScheduledEmailModel)
     if (mongoose.connection.readyState === 0) {
       await mongoose.connect(MONGODB_URL);
-      console.log('Mongoose connected to MongoDB');
     }
 
     const client = await mongodb.MongoClient.connect(MONGODB_URL);
@@ -68,7 +67,7 @@ const connectToDatabase = async () => {
 
     return server
   } catch (error: any) {
-    console.error("An error occured trying to connect to mongodb");
+    server.log.error("An error occured trying to connect to mongodb");
     throw new Error(error?.message);
   }
 }
@@ -197,7 +196,7 @@ export const startServer = async (server: FastifyInstance) => {
 
     return server;
   } catch (error: any) {
-    console.error({ error })
+    server.log.error({ error })
     throw new Error(error.message)
   }
 }
@@ -207,10 +206,10 @@ connectToDatabase() //Start the database
   .then((server) => { //Start listening
     server.listen({ port: 4000, host: NODE_ENV === "development" ? undefined : '0.0.0.0' }, (err, address) => {
       if (err) {
-        console.error(err)
+        server.log.error(err)
         process.exit(1);
       }
-      console.error(`Server listening at ${address}`)
+      server.log.info(`Server listening at ${address}`)
     })
   });
 

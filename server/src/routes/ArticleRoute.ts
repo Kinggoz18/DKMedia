@@ -31,19 +31,16 @@ export class ArticleRoute implements IRoute<ArticleDocument> {
     this.protectMiddleware = createProtectMiddleware(authCodeCollection, userCollection);
 
     if (!this.server) {
-      console.error("Error: Failed to load server")
       this.logger.error("Failed to load server");
       return;
     }
 
     if (!this.collection) {
-      console.error("Error: Failed to load articles collection")
       this.logger.error("Failed to load articles collection");
       return;
     }
 
     if (!this.service) {
-      console.error("Error: Failed to load articles service")
       this.logger.error("Failed to load articles service");
       return;
     }
@@ -96,7 +93,6 @@ export class ArticleRoute implements IRoute<ArticleDocument> {
         done()
       }, { prefix: this.basePath })
     } catch (error: any) {
-      console.error({ error })
       this.logger.error({ error });
       return;
     }

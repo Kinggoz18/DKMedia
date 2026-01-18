@@ -31,19 +31,16 @@ export class AboutUsRoute implements IRoute<AboutUsDocument> {
     this.protectMiddleware = createProtectMiddleware(authCodeCollection, userCollection);
 
     if (!this.server) {
-      console.error("Error: Failed to load server")
       this.logger.error("Failed to load server");
       return;
     }
 
     if (!this.collection) {
-      console.error("Error: Failed to load about us collection")
       this.logger.error("Failed to load about us collection");
       return;
     }
 
     if (!this.service) {
-      console.error("Error: Failed to load about us service")
       this.logger.error("Failed to load about us service");
       return;
     }
@@ -97,7 +94,6 @@ export class AboutUsRoute implements IRoute<AboutUsDocument> {
         done()
       }, { prefix: this.basePath })
     } catch (error: any) {
-      console.error({ error })
       this.logger.error({ error });
       return;
     }

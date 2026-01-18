@@ -25,13 +25,11 @@ export class EmailRoute {
     this.protectMiddleware = createProtectMiddleware(authCodeCollection, userCollection);
 
     if (!this.server) {
-      console.error("Error: Failed to load server")
       this.logger.error("Failed to load server");
       return;
     }
 
     if (!this.emailService) {
-      console.error("Error: Failed to load email service")
       this.logger.error("Failed to load email service");
       return;
     }
@@ -71,7 +69,6 @@ export class EmailRoute {
         done()
       }, { prefix: this.basePath })
     } catch (error: any) {
-      console.error({ error })
       this.logger.error({ error });
       return;
     }

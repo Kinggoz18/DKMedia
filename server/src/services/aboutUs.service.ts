@@ -39,7 +39,6 @@ export class AboutUsService implements IService<AboutUsDocument> {
 
       const currentAboutUs = await this.dbCollection.findOne({});
 
-      console.error({ currentAboutUs })
       //If there is no about us
       if (!currentAboutUs) {
         const updateAboutUs = await this.dbCollection.insertOne(aboutUs);
@@ -55,7 +54,6 @@ export class AboutUsService implements IService<AboutUsDocument> {
         //Update the values
         const updatedTitle = title === "" ? currentAboutUs.title : title;
 
-        console.error({ updatedTitle, paragraphs })
         // Insert the new update
         const updateAboutUs = await this.dbCollection.updateOne({ _id: currentAboutUs?._id }, {
           $set: {

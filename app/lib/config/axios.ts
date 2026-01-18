@@ -1,13 +1,22 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { BACKEND_URL } from './api';
 
+// Detect if we are in the browser
+
 /**
  * Create an axios instance configured for API requests
  * Only sends credentials (cookies) for POST/PUT/DELETE requests (protected endpoints)
  */
 export const createApiClient = (): AxiosInstance => {
+  const isBrowser = typeof window !== 'undefined';
+
+  // Determine base URL based on environment
+  const baseURL = isBrowser
+    ? (import.meta.env.VITE_API_URL || '/api/v1')  // Browser: relative or VITE_API_URL
+    : (process.env.VITE_INTERNAL_API_URL || 'http://127.0.0.1:4000/api/v1'); // Server: internal URL
+
   const apiClient = axios.create({
-    baseURL: BACKEND_URL,
+    baseURL,
     withCredentials: false, // Default to false, set per request for protected endpoints
     headers: {
       'Content-Type': 'application/json',
@@ -19,13 +28,13 @@ export const createApiClient = (): AxiosInstance => {
     (config: InternalAxiosRequestConfig) => {
       // Only send credentials for POST/PUT/DELETE/GET requests to protected CMS endpoints
       const isProtectedMethod = config.method === 'post' || config.method === 'put' || config.method === 'delete' || config.method === 'get';
-      
+
       if (isProtectedMethod) {
         config.withCredentials = true; // Include cookies for protected endpoints
-        
+
         // Get CSRF token from localStorage (MUST be from localStorage, not cookies)
         const csrfToken = getCSRFTokenFromLocalStorage();
-        
+
         if (csrfToken) {
           config.headers['X-CSRF-Token'] = csrfToken;
         } else {
@@ -52,7 +61,7 @@ export const createApiClient = (): AxiosInstance => {
           localStorage.removeItem('csrf_token');
           localStorage.removeItem('user');
         }
-        
+
         // Redirect to login if not already there
         if (typeof window !== 'undefined' && !window.location.pathname.includes('/auth')) {
           window.location.href = '/auth';
@@ -71,7 +80,7 @@ export const createApiClient = (): AxiosInstance => {
  */
 function getCSRFTokenFromLocalStorage(): string | null {
   if (typeof window === 'undefined') return null;
-  
+
   const csrfToken = localStorage.getItem('csrf_token');
   return csrfToken;
 }
@@ -81,11 +90,11 @@ function getCSRFTokenFromLocalStorage(): string | null {
  */
 function getUserId(): string | null {
   if (typeof window === 'undefined') return null;
-  
+
   // Try to get from localStorage first (stored by handleOAuthRedirect)
   const userId = localStorage.getItem('userId');
   if (userId) return userId;
-  
+
   // Try to get from user object in localStorage (stored by AuthSlice)
   const userStr = localStorage.getItem('user');
   if (userStr) {
@@ -99,7 +108,7 @@ function getUserId(): string | null {
       // Ignore parse errors
     }
   }
-  
+
   // Try to get from URL params (after auth redirect)
   const urlParams = new URLSearchParams(window.location.search);
   const authId = urlParams.get('authId');
@@ -107,7 +116,7 @@ function getUserId(): string | null {
     localStorage.setItem('userId', authId);
     return authId;
   }
-  
+
   return null;
 }
 

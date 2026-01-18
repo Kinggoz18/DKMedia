@@ -119,7 +119,6 @@ export const createProtectMiddleware = (
       // Attach user to request for use in route handlers
       (request as any).user = authorizedUser;
     } catch (error: any) {
-      console.error('Authorization error:', error);
       reply.code(401).send({ success: false, error: error.message });
       return;
     }
@@ -172,7 +171,6 @@ async function fetchNewRefreshToken(
     reply.setCookie('accessToken', newAccessToken, cookieOptions)
       .setCookie('refreshToken', newRefreshToken, cookieOptions);
   } catch (error) {
-    console.error('Error fetching new refresh token', error);
     throw new Error('Failed to fetch new refresh token');
   }
 }
@@ -191,7 +189,6 @@ async function refreshAccessToken(userAuth: AuthCodeDocument, request: FastifyRe
 
     reply.setCookie('accessToken', newAccessToken, cookieOptions);
   } catch (error) {
-    console.error('Error refreshing access token', error);
     throw new Error('Failed to refresh access token');
   }
 }

@@ -25,7 +25,7 @@ export default function HomeSection() {
   }, []);
 
   const [isDeletePopup, setIsDeletePopup] = useState(false);
-  const [_eventToDelete, setEventToDelete] = useState("");
+  const [eventToDelete, setEventToDelete] = useState("");
   // const [isAddEventPopup, setIsAddEventPopup] = useState(false);
   const [allEvents, setAllEvents] = useState<[IEvent]>([{
     _id: "",
@@ -54,9 +54,17 @@ export default function HomeSection() {
   /**
    * Confirm delete event action
    */
-  function onYesDeleteClick() {
-    setIsDeletePopup(false)
-    setEventToDelete("");
+  async function onYesDeleteClick() {
+    try {
+      await eventService.deleteEvent(eventToDelete);
+      setIsDeletePopup(false)
+      setEventToDelete("");
+      await fetchEvents();
+    } catch (error: any) {
+      setIsDeletePopup(false)
+      setEventToDelete("");
+      console.error('Failed to delete event:', error);
+    }
   }
 
   /**

@@ -31,19 +31,16 @@ export class SubscriptionRoute implements IRoute<SubscriptionDocument> {
     this.protectMiddleware = createProtectMiddleware(authCodeCollection, userCollection);
 
     if (!this.server) {
-      console.error("Error: Failed to load server")
       this.logger.error("Failed to load server");
       return;
     }
 
     if (!this.collection) {
-      console.error("Error: Failed to load subscription collection")
       this.logger.error("Failed to load subscription collection");
       return;
     }
 
     if (!this.service) {
-      console.error("Error: Failed to load subscription service")
       this.logger.error("Failed to load subscription service");
       return;
     }
@@ -177,7 +174,6 @@ export class SubscriptionRoute implements IRoute<SubscriptionDocument> {
         done()
       }, { prefix: this.basePath })
     } catch (error: any) {
-      console.error({ error })
       this.logger.error({ error });
       return;
     }

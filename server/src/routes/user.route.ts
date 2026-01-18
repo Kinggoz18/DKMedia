@@ -41,19 +41,16 @@ export class UserRoute implements IRoute<UserDocument> {
     this.protectMiddleware = createProtectMiddleware(authCodeCollection, this.collection);
 
     if (!this.server) {
-      console.error("Error: Failed to load server")
       this.logger.error("Failed to load server");
       return;
     }
 
     if (!this.collection) {
-      console.error("Error: Failed to load auth collection")
       this.logger.error("Failed to load auth collection");
       return;
     }
 
     if (!this.service) {
-      console.error("Error: Failed to load auth service")
       this.logger.error("Failed to load auth service");
       return;
     }
@@ -151,7 +148,6 @@ export class UserRoute implements IRoute<UserDocument> {
       }, { prefix: this.basePath })
 
     } catch (error: any) {
-      console.error({ error })
       this.logger.error({ error });
       return;
     }

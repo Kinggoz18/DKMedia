@@ -241,7 +241,6 @@ export class EventService implements IService<EventDocument> {
       return reply.code(200).send({ success: true, data: secureUrl });
     } catch (error: any) {
       request.log.error(error?.message)
-      console.error('Image Upload Error:', error);
       return reply.status(500).send({ success: false, data: "Image upload failed" })
     }
   }
@@ -269,7 +268,6 @@ export class EventService implements IService<EventDocument> {
       return reply.code(200).send({ success: true, data: secureUrl });
     } catch (error: any) {
       request.log.error(error?.message)
-      console.error('Video Upload Error:', error);
       return reply.status(500).send({ success: false, data: "Video upload failed" })
     }
   }
