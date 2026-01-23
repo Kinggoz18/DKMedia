@@ -1,0 +1,46 @@
+# DKMedia305 - LLM Information File
+
+## Project Summary
+
+DKMedia305 is a unified web application that combines a public-facing website and content management system (CMS) for a nightlife and event media company. The platform showcases exclusive nightlife experiences, event recaps, articles, and provides a newsletter subscription service for curated invitations to exclusive events.
+
+## Public-Facing URLs
+
+- **Home**: `/` - Main landing page featuring events, media, and newsletter subscription
+- **Media/Recaps**: `/media` - Gallery of event recaps and media content
+- **Contact**: `/contact` - Contact form for inquiries and business communications
+- **Privacy Policy**: `/privacy-policy` - Privacy policy and data handling information
+- **Unsubscribe**: `/unsubscribe` - Newsletter unsubscribe page
+
+## Technical Overview
+
+### Architecture
+- **Frontend**: Remix (React framework) with Vite build tool and Tailwind CSS for styling
+- **Backend**: Fastify (Node.js) server providing RESTful API endpoints
+- **Database**: MongoDB for data persistence
+- **Email Service**: Resend API integration with RabbitMQ queue system for asynchronous email processing
+- **Queue System**: RabbitMQ for reliable email job processing
+- **Cache/State**: Redis for daily email quota management and worker state
+
+### Purpose
+DKMedia305 serves as a digital platform for:
+1. Showcasing exclusive nightlife events and experiences
+2. Publishing event recaps and media content
+3. Managing newsletter subscriptions and sending curated email campaigns
+4. Facilitating contact inquiries from potential clients and partners
+
+### Key Features
+- Event management and display
+- Media gallery and recaps
+- Newsletter subscription system with email campaigns
+- Content management system for administrators
+- Contact form with email notifications
+- Privacy policy and unsubscribe functionality
+
+### Email System
+The platform uses a robust queue-based email system:
+- Daily email quota: 100 emails per day (Resend limit)
+- Asynchronous processing via RabbitMQ
+- Automatic scheduling for emails that exceed daily limits
+- Expiration date support to prevent sending stale emails
+- Redis-based quota tracking and worker pause/resume functionality

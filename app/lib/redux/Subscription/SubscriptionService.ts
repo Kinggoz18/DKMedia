@@ -91,14 +91,16 @@ export default class SubscriptionService {
    * @param subject 
    * @param message 
    * @param html 
+   * @param expiresAt 
    * @returns Success message string
    */
-  async sendBulkNewsletter(subject: string, message: string, html?: string): Promise<string> {
+  async sendBulkNewsletter(subject: string, message: string, html?: string, expiresAt?: string): Promise<string> {
     try {
       const response = (await axios.post(`${this.apiUrl}/send-newsletter`, {
         subject,
         message,
-        html
+        html,
+        expiresAt
       }, getProtectedRequestConfig())).data as IResponse;
       if (!response.success) {
         throw new Error(response.data as string)
@@ -115,15 +117,17 @@ export default class SubscriptionService {
    * @param message 
    * @param scheduledTime 
    * @param html 
+   * @param expiresAt 
    * @returns Success message string
    */
-  async scheduleBulkNewsletter(subject: string, message: string, scheduledTime: string, html?: string): Promise<string> {
+  async scheduleBulkNewsletter(subject: string, message: string, scheduledTime: string, html?: string, expiresAt?: string): Promise<string> {
     try {
       const response = (await axios.post(`${this.apiUrl}/schedule-newsletter`, {
         subject,
         message,
         scheduledTime,
-        html
+        html,
+        expiresAt
       }, getProtectedRequestConfig())).data as IResponse;
       if (!response.success) {
         throw new Error(response.data as string)

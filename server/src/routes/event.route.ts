@@ -102,12 +102,6 @@ export class EventRoute implements IRoute<EventDocument> {
       const getAllEventsRoute: RouteOptions<Server, IncomingMessage, ServerResponse> = {
         method: 'GET',
         url: '/',
-        config: {
-          rateLimit: {
-            max: 15,
-            timeWindow: 5 * 1000 * 60 // 5 minutes
-          }
-        },
         handler: (request, reply) => this.service.getAllEvents(request, reply)
       }
 
@@ -117,12 +111,6 @@ export class EventRoute implements IRoute<EventDocument> {
       const getEventByIdRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: RequestQueryValidationType, Reply: IReplyType }> = {
         method: 'GET',
         url: '/:id',
-        config: {
-          rateLimit: {
-            max: 15,
-            timeWindow: 5 * 1000 * 60 // 5 minutes
-          }
-        },
         handler: (request, reply) => this.service.getEventById(request, reply)
       }
 

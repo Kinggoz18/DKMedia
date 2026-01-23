@@ -36,6 +36,7 @@ export default class NewsletterHistoryService {
    * @param recipientsCount 
    * @param status 
    * @param errorMessage 
+   * @param expiresAt 
    * @returns 
    */
   async addNewsletterHistory(
@@ -43,7 +44,8 @@ export default class NewsletterHistoryService {
     message: string,
     recipientsCount: number,
     status: 'sent' | 'failed' = 'sent',
-    errorMessage?: string
+    errorMessage?: string,
+    expiresAt?: string
   ): Promise<INewsletterHistory> {
     try {
       const response = (await axios.post(`${this.apiUrl}`, {
@@ -51,7 +53,8 @@ export default class NewsletterHistoryService {
         message,
         recipientsCount,
         status,
-        errorMessage
+        errorMessage,
+        expiresAt
       }, getProtectedRequestConfig())).data as IResponse;
       if (!response.success) {
         throw new Error(response.data as string)

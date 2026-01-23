@@ -7,6 +7,7 @@ export const AddNewsletterHistoryValidationSchema = Type.Object({
   recipientsCount: Type.Number({ minimum: 0 }),
   status: Type.Optional(Type.Union([Type.Literal('sent'), Type.Literal('failed')])),
   errorMessage: Type.Optional(Type.String()),
+  expiresAt: Type.String({ format: 'date-time' }), // ISO 8601 date-time string
 });
 
 export const NewsletterHistoryPaginationSchema = Type.Object({

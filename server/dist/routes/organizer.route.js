@@ -78,12 +78,6 @@ export class OrganizerRoute {
             const getAllOrganizersRoute = {
                 method: 'GET',
                 url: '/',
-                config: {
-                    rateLimit: {
-                        max: 15,
-                        timeWindow: 5 * 1000 * 60 // 5 minutes
-                    }
-                },
                 handler: (request, reply) => this.service.getAllOrganizer(request, reply)
             };
             /**
@@ -92,12 +86,6 @@ export class OrganizerRoute {
             const getOrganizerByIdRoute = {
                 method: 'GET',
                 url: '/:id',
-                config: {
-                    rateLimit: {
-                        max: 15,
-                        timeWindow: 5 * 1000 * 60 // 5 minutes
-                    }
-                },
                 handler: (request, reply) => this.service.getOrganizerById(request, reply)
             };
             /**

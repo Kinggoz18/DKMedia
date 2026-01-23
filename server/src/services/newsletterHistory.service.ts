@@ -36,7 +36,14 @@ export class NewsletterHistoryService implements IService<NewsletterHistoryDocum
         recipientsCount,
         status = 'sent',
         errorMessage,
+        expiresAt,
       } = request.body;
+
+      // Validate expiresAt is a valid date
+      const expiresAtDate = new Date(expiresAt);
+      if (isNaN(expiresAtDate.getTime())) {
+        throw new ReplyError("Invalid expiresAt date format", 400);
+      }
 
       const newHistory = new this.dbModel({
         subject,
@@ -45,6 +52,7 @@ export class NewsletterHistoryService implements IService<NewsletterHistoryDocum
         status,
         errorMessage,
         sentAt: new Date(),
+        expiresAt: expiresAtDate,
       });
 
       await newHistory.validate();

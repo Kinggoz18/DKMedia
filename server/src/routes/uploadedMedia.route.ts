@@ -102,12 +102,6 @@ export class UploadMediaRoute implements IRoute<UploadedMediaDocument> {
       const getAllMediaRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Querystring: { page?: string; limit?: string } }> = {
         method: 'GET',
         url: '/',
-        config: {
-          rateLimit: {
-            max: 15,
-            timeWindow: 5 * 1000 * 60 // 5 minutes
-          }
-        },
         handler: (request, reply) => this.service.getAllMedia(request, reply)
       }
 
@@ -117,12 +111,6 @@ export class UploadMediaRoute implements IRoute<UploadedMediaDocument> {
       const getMediaByIdRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: RequestQueryValidationType, Reply: IReplyType }> = {
         method: 'GET',
         url: '/:id',
-        config: {
-          rateLimit: {
-            max: 15,
-            timeWindow: 5 * 1000 * 60 // 5 minutes
-          }
-        },
         handler: (request, reply) => this.service.getMediaById(request, reply)
       }
 

@@ -29,6 +29,11 @@ export const ScheduledEmailMongooseSchema = new Schema({
     },
     error: {
         type: String
+    },
+    expiresAt: {
+        type: Date,
+        required: false,
+        index: true // Index for efficient querying by expiration
     }
 }, { timestamps: true });
 // Index for efficient queries on scheduledTime and status

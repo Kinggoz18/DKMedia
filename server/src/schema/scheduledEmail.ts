@@ -18,6 +18,7 @@ export interface ScheduledEmailDocument extends Document {
   status: 'pending' | 'processing' | 'sent' | 'failed';
   lastAttemptAt?: Date;
   error?: string;
+  expiresAt?: Date;
 }
 
 // Interface for static methods
@@ -59,6 +60,11 @@ export const ScheduledEmailMongooseSchema = new Schema<ScheduledEmailDocument>(
     },
     error: {
       type: String
+    },
+    expiresAt: {
+      type: Date,
+      required: false,
+      index: true // Index for efficient querying by expiration
     }
   },
   { timestamps: true }

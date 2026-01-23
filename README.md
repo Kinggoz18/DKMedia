@@ -28,7 +28,52 @@ GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
 GOOGLE_CALLBACK_URL=http://localhost:4000/api/v1/auth/google/callback
 EMAILJS_KEY=your_emailjs_key
+
+# Email Service (Resend)
+RESEND_API_KEY=your_resend_api_key
+RESEND_FROM_EMAIL=info@dkmedia305.com
+
+# Queue System (RabbitMQ)
+RABBITMQ_URL=amqp://localhost:5672
+
+# Cache/State (Redis)
+REDIS_URL=redis://localhost:6379
 ```
+
+## New Environment Variables
+
+### Email Service Configuration
+- **RESEND_API_KEY** (required): Your Resend API key for sending emails. Get it from [resend.com](https://resend.com)
+- **RESEND_FROM_EMAIL** (optional): Default sender email address. Defaults to `info@dkmedia305.com` if not set
+
+### Queue System Configuration
+- **RABBITMQ_URL** (optional): RabbitMQ connection URL. Defaults to `amqp://localhost:5672` if not set
+  - Format: `amqp://[username:password@]host[:port]`
+  - Example: `amqp://guest:guest@localhost:5672`
+
+### Cache/State Configuration
+- **REDIS_URL** (optional): Redis connection URL. Defaults to `redis://localhost:6379` if not set
+  - Format: `redis://[password@]host[:port]`
+  - Example: `redis://localhost:6379` or `redis://:password@localhost:6379`
+
+## Email System Architecture
+
+The application uses a queue-based email system with the following components:
+
+1. **EmailService**: Publishes email jobs to RabbitMQ queue
+2. **EmailQueueWorker**: Consumes and processes email jobs from RabbitMQ
+3. **RedisQuotaService**: Tracks daily email quota (100 emails/day) and manages worker pause/resume state
+4. **RabbitMQService**: Handles queue operations and job publishing
+
+### Daily Email Quota
+- **Limit**: 100 emails per day (Resend free tier limit)
+- **Reset**: Automatically resets at UTC midnight (00:00:00 UTC)
+- **Overflow Handling**: Emails exceeding the daily limit are automatically scheduled for the next UTC day
+
+### Email Expiration
+- All newsletter emails support an `expiresAt` field
+- Expired emails are automatically discarded before sending
+- Prevents sending stale or outdated content
 
 3. Ensure you have a `server/secret-key` file for session encryption (copy from DKMEDIA_CMS_API if needed).
 

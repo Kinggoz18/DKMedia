@@ -54,12 +54,6 @@ export class NewsletterHistoryRoute {
             const getNewsletterHistoryRoute = {
                 method: 'GET',
                 url: '/',
-                config: {
-                    rateLimit: {
-                        max: 15,
-                        timeWindow: 5 * 1000 * 60 // 5 minutes
-                    }
-                },
                 handler: (request, reply) => this.service.getNewsletterHistory(request, reply)
             };
             /**
@@ -68,12 +62,6 @@ export class NewsletterHistoryRoute {
             const getNewsletterHistoryByIdRoute = {
                 method: 'GET',
                 url: '/:id',
-                config: {
-                    rateLimit: {
-                        max: 15,
-                        timeWindow: 5 * 1000 * 60 // 5 minutes
-                    }
-                },
                 handler: (request, reply) => this.service.getNewsletterHistoryById(request, reply)
             };
             /******************************************* Register Routes *******************************************/

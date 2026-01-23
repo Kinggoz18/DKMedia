@@ -85,24 +85,12 @@ export class ContactUsRoute implements IRoute<ContactUsDocument> {
       const getAllContactRoute: RouteOptions<Server, IncomingMessage, ServerResponse> = {
         method: 'GET',
         url: '/',
-        config: {
-          rateLimit: {
-            max: 15,
-            timeWindow: 5 * 1000 * 60 // 5 minutes
-          }
-        },
         handler: (request, reply) => this.service.getAllContact(request, reply)
       }
 
       const getContactInquiryByIdRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: RequestQueryValidationType, Reply: IReplyType }> = {
         method: 'GET',
         url: '/:id',
-        config: {
-          rateLimit: {
-            max: 15,
-            timeWindow: 5 * 1000 * 60 // 5 minutes
-          }
-        },
         handler: (request, reply) => this.service.getContactInquiryById(request, reply)
       }
 

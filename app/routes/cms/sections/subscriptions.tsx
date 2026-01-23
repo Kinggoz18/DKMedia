@@ -24,6 +24,7 @@ export default function Subscriptions() {
   const [newsletterMessage, setNewsletterMessage] = useState("");
   const [isScheduled, setIsScheduled] = useState(false);
   const [scheduledDateTime, setScheduledDateTime] = useState("");
+  const [expiresAt, setExpiresAt] = useState("");
   const errorRef = useRef<HTMLDivElement>(null);
   const [responseError, setResponseError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -164,16 +165,43 @@ export default function Subscriptions() {
       }
     }
 
+    // Validate expiration date if provided
+    if (expiresAt.trim()) {
+      const expirationDate = new Date(expiresAt);
+      const now = new Date();
+      if (expirationDate <= now) {
+        handleThrowError("Expiration date must be in the future");
+        return;
+      }
+      // If scheduled, expiration must be after scheduled time
+      if (isScheduled && scheduledDateTime.trim()) {
+        const scheduleDate = new Date(scheduledDateTime);
+        if (expirationDate <= scheduleDate) {
+          handleThrowError("Expiration date must be after the scheduled send time");
+          return;
+        }
+      }
+    } else {
+      handleThrowError("Please set an expiration date for the newsletter");
+      return;
+    }
+
     setIsSending(true);
     try {
       let message: string;
+      
+      // Convert datetime-local to ISO string for backend
+      const expiresAtISO = expiresAt ? new Date(expiresAt).toISOString() : '';
+      const scheduledDateTimeISO = isScheduled && scheduledDateTime ? new Date(scheduledDateTime).toISOString() : '';
       
       if (isScheduled) {
         // Schedule bulk newsletter
         message = await subscriptionService.scheduleBulkNewsletter(
           newsletterSubject,
           newsletterMessage,
-          scheduledDateTime
+          scheduledDateTimeISO,
+          undefined, // html
+          expiresAtISO
         ) as string;
         
         // Save to newsletter history with 'scheduled' status (we'll treat it as 'sent' for history)
@@ -183,7 +211,8 @@ export default function Subscriptions() {
             newsletterMessage,
             totalSubscribers,
             'sent', // Treat scheduled as sent in history
-            undefined
+            undefined, // errorMessage
+            expiresAtISO
           );
         } catch (historyError: any) {
           console.error("Failed to save newsletter history:", historyError);
@@ -194,7 +223,9 @@ export default function Subscriptions() {
         // Send bulk newsletter immediately
         message = await subscriptionService.sendBulkNewsletter(
           newsletterSubject,
-          newsletterMessage
+          newsletterMessage,
+          undefined, // html
+          expiresAtISO
         ) as string;
         
         // Extract numbers from message for status determination
@@ -216,7 +247,8 @@ export default function Subscriptions() {
             newsletterMessage,
             totalSubscribers,
             status,
-            errorMessage
+            errorMessage,
+            expiresAtISO
           );
         } catch (historyError: any) {
           console.error("Failed to save newsletter history:", historyError);
@@ -230,6 +262,7 @@ export default function Subscriptions() {
       setNewsletterMessage("");
       setIsScheduled(false);
       setScheduledDateTime("");
+      setExpiresAt("");
       setIsNewsletterPopup(false);
       
       // Refresh history if on history view
@@ -242,12 +275,14 @@ export default function Subscriptions() {
     } catch (error: any) {
       // Save failed attempt to history
       try {
+        const expiresAtISO = expiresAt ? new Date(expiresAt).toISOString() : '';
         await newsletterHistoryService.addNewsletterHistory(
           newsletterSubject,
           newsletterMessage,
           totalSubscribers,
           'failed',
-          error?.message || "Failed to send newsletter"
+          error?.message || "Failed to send newsletter",
+          expiresAtISO
         );
       } catch (historyError) {
         console.error("Failed to save newsletter history:", historyError);
@@ -587,6 +622,24 @@ export default function Subscriptions() {
                   />
                 </div>
 
+                {/* Expiration Date */}
+                <div className="space-y-2 pt-2 border-t border-neutral-800/50">
+                  <label className="text-sm font-medium text-neutral-300">
+                    Expiration Date <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={expiresAt}
+                    onChange={(e) => setExpiresAt(e.target.value)}
+                    min={isScheduled && scheduledDateTime ? scheduledDateTime : new Date().toISOString().slice(0, 16)}
+                    required
+                    className="input-modern w-full py-3 px-4 rounded-xl"
+                  />
+                  <p className="text-xs text-neutral-400 leading-relaxed">
+                    Choose a date and time when this newsletter should no longer be sent. This helps ensure subscribers only receive timely and relevant content. Any emails that haven't been sent by this date will be automatically cancelled.
+                  </p>
+                </div>
+
                 {/* Schedule Option */}
                 <div className="space-y-3 pt-2 border-t border-neutral-800/50">
                   <label className="flex items-center gap-3 cursor-pointer group">
@@ -605,8 +658,18 @@ export default function Subscriptions() {
                       <input
                         type="datetime-local"
                         value={scheduledDateTime}
-                        onChange={(e) => setScheduledDateTime(e.target.value)}
+                        onChange={(e) => {
+                          setScheduledDateTime(e.target.value);
+                          // Update expiration min date if scheduled time changes
+                          if (expiresAt && new Date(expiresAt) <= new Date(e.target.value)) {
+                            // Auto-adjust expiration to be after scheduled time
+                            const scheduleDate = new Date(e.target.value);
+                            scheduleDate.setHours(scheduleDate.getHours() + 1); // Add 1 hour buffer
+                            setExpiresAt(scheduleDate.toISOString().slice(0, 16));
+                          }
+                        }}
                         min={new Date().toISOString().slice(0, 16)}
+                        max={expiresAt || undefined}
                         className="input-modern w-full py-3 px-4 rounded-xl"
                       />
                       <p className="text-xs text-neutral-500">
@@ -619,7 +682,7 @@ export default function Subscriptions() {
                 <div className="flex gap-4 pt-2">
                   <button
                     onClick={handleSendNewsletter}
-                    disabled={isSending || (isScheduled && !scheduledDateTime.trim())}
+                    disabled={isSending || !expiresAt.trim() || (isScheduled && !scheduledDateTime.trim())}
                     className="flex-1 py-4 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-500 text-white rounded-xl font-semibold transition-all duration-300 shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isScheduled ? 'Schedule Newsletter' : 'Send Newsletter'}

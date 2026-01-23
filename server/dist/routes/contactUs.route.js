@@ -64,23 +64,11 @@ export class ContactUsRoute {
             const getAllContactRoute = {
                 method: 'GET',
                 url: '/',
-                config: {
-                    rateLimit: {
-                        max: 15,
-                        timeWindow: 5 * 1000 * 60 // 5 minutes
-                    }
-                },
                 handler: (request, reply) => this.service.getAllContact(request, reply)
             };
             const getContactInquiryByIdRoute = {
                 method: 'GET',
                 url: '/:id',
-                config: {
-                    rateLimit: {
-                        max: 15,
-                        timeWindow: 5 * 1000 * 60 // 5 minutes
-                    }
-                },
                 handler: (request, reply) => this.service.getContactInquiryById(request, reply)
             };
             const replyToInquiryRoute = {

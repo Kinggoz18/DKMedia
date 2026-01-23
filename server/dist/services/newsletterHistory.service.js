@@ -12,7 +12,12 @@ export class NewsletterHistoryService {
          */
         this.addNewsletterHistory = async (request, reply) => {
             try {
-                const { subject, message, recipientsCount, status = 'sent', errorMessage, } = request.body;
+                const { subject, message, recipientsCount, status = 'sent', errorMessage, expiresAt, } = request.body;
+                // Validate expiresAt is a valid date
+                const expiresAtDate = new Date(expiresAt);
+                if (isNaN(expiresAtDate.getTime())) {
+                    throw new ReplyError("Invalid expiresAt date format", 400);
+                }
                 const newHistory = new this.dbModel({
                     subject,
                     message,
@@ -20,6 +25,7 @@ export class NewsletterHistoryService {
                     status,
                     errorMessage,
                     sentAt: new Date(),
+                    expiresAt: expiresAtDate,
                 });
                 await newHistory.validate();
                 const savedHistory = await this.dbCollection.insertOne(newHistory);

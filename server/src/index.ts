@@ -18,7 +18,7 @@ import { fileURLToPath } from 'node:url';
 import { PassportConfig } from './config/passport.js';
 import { createRequestHandler } from '@remix-run/node';
 import type { ServerBuild } from '@remix-run/node';
-import ScheduledEmailProcessor from './services/ScheduledEmailProcessor.js';
+import EmailQueueWorker from './services/EmailQueueWorker.js';
 
 dotenv.config();
 
@@ -80,9 +80,9 @@ export const startServer = async (server: FastifyInstance) => {
     const database = server.mongo.client.db(DATABASE_NAME);
     if (!database) throw new Error("Failed to load database");
 
-    // Start scheduled email processor (uses database + cron job)
-    const emailProcessor = new ScheduledEmailProcessor(server.log);
-    emailProcessor.start();
+    // Start email queue worker (RabbitMQ consumer)
+    const emailWorker = new EmailQueueWorker(server.log);
+    await emailWorker.start();
 
     // Set up cookies
     await server.register(fastifyCookie, {

@@ -95,12 +95,6 @@ export class SubscriptionRoute implements IRoute<SubscriptionDocument> {
       const getAllSubscriptionRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Querystring: { page?: string; limit?: string } }> = {
         method: 'GET',
         url: '/',
-        config: {
-          rateLimit: {
-            max: 15,
-            timeWindow: 5 * 1000 * 60 // 5 minutes
-          }
-        },
         handler: (request, reply) => this.service.getAllSubscription(request, reply)
       }
 
@@ -110,12 +104,6 @@ export class SubscriptionRoute implements IRoute<SubscriptionDocument> {
       const getSubscriptionByIdRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: RequestQueryValidationType, Reply: IReplyType }> = {
         method: 'GET',
         url: '/:id',
-        config: {
-          rateLimit: {
-            max: 15,
-            timeWindow: 5 * 1000 * 60 // 5 minutes
-          }
-        },
         handler: (request, reply) => this.service.getSubscription(request, reply)
       }
 
@@ -137,7 +125,7 @@ export class SubscriptionRoute implements IRoute<SubscriptionDocument> {
       /**
        * Send bulk newsletter route
        */
-      const sendBulkNewsletterRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Body: { subject: string; message: string; html?: string }, Reply: IReplyType }> = {
+      const sendBulkNewsletterRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Body: { subject: string; message: string; html?: string; expiresAt?: string }, Reply: IReplyType }> = {
         method: 'POST',
         url: '/send-newsletter',
         config: {
@@ -153,7 +141,8 @@ export class SubscriptionRoute implements IRoute<SubscriptionDocument> {
             properties: {
               subject: { type: 'string' },
               message: { type: 'string' },
-              html: { type: 'string' }
+              html: { type: 'string' },
+              expiresAt: { type: 'string', format: 'date-time' }
             }
           },
           response: IReply.$schema,
@@ -165,7 +154,7 @@ export class SubscriptionRoute implements IRoute<SubscriptionDocument> {
       /**
        * Schedule bulk newsletter route
        */
-      const scheduleBulkNewsletterRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Body: { subject: string; message: string; scheduledTime: string; html?: string }, Reply: IReplyType }> = {
+      const scheduleBulkNewsletterRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Body: { subject: string; message: string; scheduledTime: string; html?: string; expiresAt?: string }, Reply: IReplyType }> = {
         method: 'POST',
         url: '/schedule-newsletter',
         config: {
@@ -181,8 +170,9 @@ export class SubscriptionRoute implements IRoute<SubscriptionDocument> {
             properties: {
               subject: { type: 'string' },
               message: { type: 'string' },
-              scheduledTime: { type: 'string' },
-              html: { type: 'string' }
+              scheduledTime: { type: 'string', format: 'date-time' },
+              html: { type: 'string' },
+              expiresAt: { type: 'string', format: 'date-time' }
             }
           },
           response: IReply.$schema,

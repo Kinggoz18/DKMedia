@@ -9,6 +9,7 @@ export interface NewsletterHistoryDocument extends Document {
   sentAt: Date;
   status: 'sent' | 'failed';
   errorMessage?: string;
+  expiresAt: Date;
 }
 
 export const NewsletterHistoryMongooseSchema = new Schema<NewsletterHistoryDocument>({
@@ -18,6 +19,7 @@ export const NewsletterHistoryMongooseSchema = new Schema<NewsletterHistoryDocum
   sentAt: { type: Date, default: Date.now },
   status: { type: String, enum: ['sent', 'failed'], default: 'sent' },
   errorMessage: { type: String, required: false },
+  expiresAt: { type: Date, required: true },
 }, { timestamps: true });
 
 export const NewsletterHistoryModel = mongoose.model("NewsletterHistory", NewsletterHistoryMongooseSchema)

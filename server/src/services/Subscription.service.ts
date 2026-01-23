@@ -217,14 +217,28 @@ export class SubscriptionService implements IService<SubscriptionDocument> {
    * @returns 
    */
   sendBulkNewsletter = async (
-    request: FastifyRequest<{ Body: { subject: string; message: string; html?: string } }>,
+    request: FastifyRequest<{ Body: { subject: string; message: string; html?: string; expiresAt?: string } }>,
     reply: FastifyReply<{ Reply: IReplyType }>
   ) => {
     try {
-      const { subject, message, html } = request.body;
+      const { subject, message, html, expiresAt } = request.body;
 
       if (!subject || !message) {
         throw new ReplyError("Subject and message are required", 400);
+      }
+
+      if (!expiresAt) {
+        throw new ReplyError("expiresAt is required", 400);
+      }
+
+      // Validate expiresAt
+      const expiresAtDate = new Date(expiresAt);
+      if (isNaN(expiresAtDate.getTime())) {
+        throw new ReplyError("Invalid expiresAt date format", 400);
+      }
+      // Check if expiresAt is in the future
+      if (expiresAtDate <= new Date()) {
+        throw new ReplyError("expiresAt must be in the future", 400);
       }
 
       // Get all subscriber emails
@@ -243,7 +257,8 @@ export class SubscriptionService implements IService<SubscriptionDocument> {
         subject,
         htmlContent,
         message,
-        'newsletter'
+        'newsletter',
+        expiresAtDate
       );
 
       if (!result.success && result.sent === 0 && result.scheduled === 0) {
@@ -273,14 +288,18 @@ export class SubscriptionService implements IService<SubscriptionDocument> {
    * @returns 
    */
   scheduleBulkNewsletter = async (
-    request: FastifyRequest<{ Body: { subject: string; message: string; scheduledTime: string; html?: string } }>,
+    request: FastifyRequest<{ Body: { subject: string; message: string; scheduledTime: string; html?: string; expiresAt?: string } }>,
     reply: FastifyReply<{ Reply: IReplyType }>
   ) => {
     try {
-      const { subject, message, scheduledTime, html } = request.body;
+      const { subject, message, scheduledTime, html, expiresAt } = request.body;
 
       if (!subject || !message || !scheduledTime) {
         throw new ReplyError("Subject, message, and scheduledTime are required", 400);
+      }
+
+      if (!expiresAt) {
+        throw new ReplyError("expiresAt is required", 400);
       }
 
       // Validate scheduled time is in the future
@@ -288,6 +307,16 @@ export class SubscriptionService implements IService<SubscriptionDocument> {
       const now = new Date();
       if (scheduleDate <= now) {
         throw new ReplyError("Scheduled time must be in the future", 400);
+      }
+
+      // Validate expiresAt
+      const expiresAtDate = new Date(expiresAt);
+      if (isNaN(expiresAtDate.getTime())) {
+        throw new ReplyError("Invalid expiresAt date format", 400);
+      }
+      // Check if expiresAt is after scheduledTime
+      if (expiresAtDate <= scheduleDate) {
+        throw new ReplyError("expiresAt must be after scheduledTime", 400);
       }
 
       // Get all subscriber emails
@@ -307,7 +336,8 @@ export class SubscriptionService implements IService<SubscriptionDocument> {
         htmlContent,
         scheduleDate,
         message,
-        'newsletter'
+        'newsletter',
+        expiresAtDate
       );
 
       if (!result.success) {

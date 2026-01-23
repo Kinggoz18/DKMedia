@@ -74,12 +74,6 @@ export class SubscriptionRoute {
             const getAllSubscriptionRoute = {
                 method: 'GET',
                 url: '/',
-                config: {
-                    rateLimit: {
-                        max: 15,
-                        timeWindow: 5 * 1000 * 60 // 5 minutes
-                    }
-                },
                 handler: (request, reply) => this.service.getAllSubscription(request, reply)
             };
             /**
@@ -88,12 +82,6 @@ export class SubscriptionRoute {
             const getSubscriptionByIdRoute = {
                 method: 'GET',
                 url: '/:id',
-                config: {
-                    rateLimit: {
-                        max: 15,
-                        timeWindow: 5 * 1000 * 60 // 5 minutes
-                    }
-                },
                 handler: (request, reply) => this.service.getSubscription(request, reply)
             };
             /**
@@ -129,7 +117,8 @@ export class SubscriptionRoute {
                         properties: {
                             subject: { type: 'string' },
                             message: { type: 'string' },
-                            html: { type: 'string' }
+                            html: { type: 'string' },
+                            expiresAt: { type: 'string', format: 'date-time' }
                         }
                     },
                     response: IReply.$schema,
@@ -156,8 +145,9 @@ export class SubscriptionRoute {
                         properties: {
                             subject: { type: 'string' },
                             message: { type: 'string' },
-                            scheduledTime: { type: 'string' },
-                            html: { type: 'string' }
+                            scheduledTime: { type: 'string', format: 'date-time' },
+                            html: { type: 'string' },
+                            expiresAt: { type: 'string', format: 'date-time' }
                         }
                     },
                     response: IReply.$schema,

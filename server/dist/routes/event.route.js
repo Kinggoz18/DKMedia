@@ -78,12 +78,6 @@ export class EventRoute {
             const getAllEventsRoute = {
                 method: 'GET',
                 url: '/',
-                config: {
-                    rateLimit: {
-                        max: 15,
-                        timeWindow: 5 * 1000 * 60 // 5 minutes
-                    }
-                },
                 handler: (request, reply) => this.service.getAllEvents(request, reply)
             };
             /**
@@ -92,12 +86,6 @@ export class EventRoute {
             const getEventByIdRoute = {
                 method: 'GET',
                 url: '/:id',
-                config: {
-                    rateLimit: {
-                        max: 15,
-                        timeWindow: 5 * 1000 * 60 // 5 minutes
-                    }
-                },
                 handler: (request, reply) => this.service.getEventById(request, reply)
             };
             /**

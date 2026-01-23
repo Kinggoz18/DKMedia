@@ -63,12 +63,6 @@ export class ContactRoute {
             const getAllContactRoute = {
                 method: 'GET',
                 url: '/',
-                config: {
-                    rateLimit: {
-                        max: 15,
-                        timeWindow: 5 * 1000 * 60 // 5 minutes
-                    }
-                },
                 handler: (request, reply) => this.service.getContact(request, reply)
             };
             /******************************************* Register Routes *******************************************/

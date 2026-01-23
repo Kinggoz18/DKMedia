@@ -167,9 +167,21 @@ export class SubscriptionService {
          */
         this.sendBulkNewsletter = async (request, reply) => {
             try {
-                const { subject, message, html } = request.body;
+                const { subject, message, html, expiresAt } = request.body;
                 if (!subject || !message) {
                     throw new ReplyError("Subject and message are required", 400);
+                }
+                if (!expiresAt) {
+                    throw new ReplyError("expiresAt is required", 400);
+                }
+                // Validate expiresAt
+                const expiresAtDate = new Date(expiresAt);
+                if (isNaN(expiresAtDate.getTime())) {
+                    throw new ReplyError("Invalid expiresAt date format", 400);
+                }
+                // Check if expiresAt is in the future
+                if (expiresAtDate <= new Date()) {
+                    throw new ReplyError("expiresAt must be in the future", 400);
                 }
                 // Get all subscriber emails
                 const recipientEmails = await this.getAllSubscriberEmails();
@@ -179,7 +191,7 @@ export class SubscriptionService {
                 // Convert message to HTML if not provided
                 const htmlContent = html || message.replace(/\n/g, '<br>');
                 // Send bulk emails
-                const result = await this.emailService.sendBulkEmail(recipientEmails, subject, htmlContent, message, 'newsletter');
+                const result = await this.emailService.sendBulkEmail(recipientEmails, subject, htmlContent, message, 'newsletter', expiresAtDate);
                 if (!result.success && result.sent === 0 && result.scheduled === 0) {
                     throw new ReplyError("Failed to send newsletter", 400);
                 }
@@ -207,15 +219,27 @@ export class SubscriptionService {
          */
         this.scheduleBulkNewsletter = async (request, reply) => {
             try {
-                const { subject, message, scheduledTime, html } = request.body;
+                const { subject, message, scheduledTime, html, expiresAt } = request.body;
                 if (!subject || !message || !scheduledTime) {
                     throw new ReplyError("Subject, message, and scheduledTime are required", 400);
+                }
+                if (!expiresAt) {
+                    throw new ReplyError("expiresAt is required", 400);
                 }
                 // Validate scheduled time is in the future
                 const scheduleDate = new Date(scheduledTime);
                 const now = new Date();
                 if (scheduleDate <= now) {
                     throw new ReplyError("Scheduled time must be in the future", 400);
+                }
+                // Validate expiresAt
+                const expiresAtDate = new Date(expiresAt);
+                if (isNaN(expiresAtDate.getTime())) {
+                    throw new ReplyError("Invalid expiresAt date format", 400);
+                }
+                // Check if expiresAt is after scheduledTime
+                if (expiresAtDate <= scheduleDate) {
+                    throw new ReplyError("expiresAt must be after scheduledTime", 400);
                 }
                 // Get all subscriber emails
                 const recipientEmails = await this.getAllSubscriberEmails();
@@ -225,7 +249,7 @@ export class SubscriptionService {
                 // Convert message to HTML if not provided
                 const htmlContent = html || message.replace(/\n/g, '<br>');
                 // Schedule bulk emails
-                const result = await this.emailService.scheduleBulkEmail(recipientEmails, subject, htmlContent, scheduleDate, message, 'newsletter');
+                const result = await this.emailService.scheduleBulkEmail(recipientEmails, subject, htmlContent, scheduleDate, message, 'newsletter', expiresAtDate);
                 if (!result.success) {
                     throw new ReplyError("Failed to schedule newsletter", 400);
                 }

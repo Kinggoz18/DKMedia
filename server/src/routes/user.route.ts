@@ -63,12 +63,6 @@ export class UserRoute implements IRoute<UserDocument> {
       const getUserRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: RequestQueryValidationType; Reply: IReplyType }> = {
         method: 'GET',
         url: `/:id`,
-        config: {
-          rateLimit: {
-            max: 15,
-            timeWindow: 5 * 1000 * 60 // 5 minutes
-          }
-        },
         schema: {
           params: RequestQueryValidation,
           response: IReply.$schema
@@ -79,12 +73,6 @@ export class UserRoute implements IRoute<UserDocument> {
       const logoutUserRoute: RouteOptions<Server, IncomingMessage, ServerResponse> = {
         method: 'GET',
         url: `/`,
-        config: {
-          rateLimit: {
-            max: 15,
-            timeWindow: 5 * 1000 * 60 // 5 minutes
-          }
-        },
         handler: (request, reply) => this.service.logoutUser(request, reply)
       }
 
@@ -148,12 +136,6 @@ export class UserRoute implements IRoute<UserDocument> {
       const confirmAuthorizedUserRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Reply: IReplyType }> = {
         method: 'GET',
         url: `/confirm`,
-        config: {
-          rateLimit: {
-            max: 15,
-            timeWindow: 5 * 1000 * 60 // 5 minutes
-          }
-        },
         schema: {
           response: IReply.$schema,
         },
