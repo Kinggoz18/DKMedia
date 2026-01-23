@@ -2,7 +2,7 @@ name: Deploy to DigitalOcean
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   deploy:
@@ -18,7 +18,6 @@ jobs:
           cache: 'npm'
 
       - name: Install & Build
-        # We build on GitHub to save the Droplet's 1GB RAM
         run: |
           npm ci
           npm run build
@@ -50,7 +49,5 @@ jobs:
             # 5. Install production dependencies and start
             npm install --omit=dev
             
-            # Run your vpsrebuild script (which contains build:client/server and pm2 start)
-            # Note: Since we built on GitHub, you could skip the build here to save RAM,
-            # but if you want to run your script exactly:
+            # Run the vpsrebuild script 
             npm run vpsrebuild
