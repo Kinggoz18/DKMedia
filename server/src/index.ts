@@ -126,23 +126,79 @@ export const startServer = async (server: FastifyInstance) => {
 
     // Serve static assets from Remix build (MUST be before Remix handler)
     // Root should be build/client (not build/client/assets) so /assets/* maps correctly
-    const clientBuildPath = path.join(__dirname, '../../build/client');
+    const clientBuildPath = path.resolve(process.cwd(), 'build/client');
+
+    // Check if client build exists
+    if (!fs.existsSync(clientBuildPath)) {
+      throw new Error(`Client build not found at ${clientBuildPath}. Run 'npm run build:client' first.`);
+    }
+
+    server.log.info(`Serving static files from: ${clientBuildPath}`);
+
     await server.register(fastifyStatic, {
       root: clientBuildPath,
       prefix: '/',
+      wildcard: true,
       decorateReply: false,
     });
 
     // Load Remix server build
-    const buildPath = path.join(__dirname, '../../build/server/index.js');
-    const viteBuild = await import(buildPath);
-    // Remix build exports named exports, not a default
-    const build = viteBuild as ServerBuild;
+    const buildPath = path.resolve(process.cwd(), 'build/server/index.js');
+
+    // Check if builds exist
+    if (!fs.existsSync(buildPath)) {
+      throw new Error(`Remix server build not found at ${buildPath}. Run 'npm run build:client' first.`);
+    }
+
+    if (!fs.existsSync(clientBuildPath)) {
+      throw new Error(`Client build not found at ${clientBuildPath}. Run 'npm run build:client' first.`);
+    }
+
+    // Check build freshness - compare server and client build timestamps
+    const serverBuildStats = fs.statSync(buildPath);
+    const clientManifestPath = path.join(clientBuildPath, '.vite/manifest.json');
+
+    if (fs.existsSync(clientManifestPath)) {
+      const clientManifestStats = fs.statSync(clientManifestPath);
+      if (clientManifestStats.mtime > serverBuildStats.mtime) {
+        server.log.warn('⚠️  WARNING: Client build is newer than server build!');
+        server.log.warn('⚠️  The server build may contain stale asset references.');
+        server.log.warn('⚠️  Please rebuild: npm run build:client');
+      }
+    }
+
+    server.log.info(`Loading Remix server build from: ${buildPath}`);
+    server.log.info(`Server build timestamp: ${serverBuildStats.mtime.toISOString()}`);
+
+    // Import the Remix server build
+    // Note: ES modules cache imports, so server must restart after rebuilds
+    // Use absolute path to ensure proper resolution
+    const absoluteBuildPath = path.resolve(buildPath);
+    // Use a timestamp to force Node to re-read the file from disk
+    const buildUrl = `file://${absoluteBuildPath}?update=${Date.now()}`;
+    const viteBuild = await import(buildUrl);
+    // Remix build exports the build as a default or named export
+    // Check what's actually exported
+    const build = (viteBuild.default || viteBuild) as ServerBuild;
+
+    if (!build || !build.assets) {
+      server.log.error('Invalid Remix build - missing build.assets');
+      throw new Error('Failed to load Remix server build - invalid build structure');
+    }
+
+    // Log some asset info for debugging
+    const assetKeys = Object.keys(build.assets);
+    const manifestAsset = assetKeys.find(key => key.includes('manifest'));
+    server.log.info(`Remix build loaded successfully with ${assetKeys.length} assets`);
+    if (manifestAsset) {
+      server.log.info(`Manifest asset: ${manifestAsset}`);
+    }
 
     // Create Remix request handler
     const remixHandler = createRequestHandler(build, NODE_ENV);
 
     // Handle all non-API routes with Remix SSR (catch-all, but after static files)
+    // Use setNotFoundHandler - fastify-static will handle static files first
     server.setNotFoundHandler(async (request, reply) => {
       // Skip API routes
       if (request.url.startsWith(BASE_PATH)) {
@@ -153,6 +209,7 @@ export const startServer = async (server: FastifyInstance) => {
       // Skip static asset requests - they should be handled by fastifyStatic
       // If we reach here for /assets/*, it means the file doesn't exist
       if (request.url.startsWith('/assets/')) {
+        server.log.warn(`Asset not found: ${request.url}`);
         reply.code(404).send({ error: 'Asset not found' });
         return;
       }

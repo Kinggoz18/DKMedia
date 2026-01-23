@@ -1,5 +1,5 @@
 {
-  "watch": ["server/src"],
+  "watch": ["server/src", "build/server"],
   "ext": "ts,js,json",
   "ignore": [
     "server/src/**/*.spec.ts",
@@ -7,7 +7,7 @@
     "node_modules",
     "server/dist",
     "app/**",
-    "build/**",
+    "build/client",
     "*.config.ts",
     "*.config.js"
   ],

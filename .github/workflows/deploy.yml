@@ -50,5 +50,8 @@ jobs:
             # 6. Install production dependencies and start
             npm install --omit=dev
             
-            # Run the vpsrebuild script 
+            # 7. NOW prune the dev dependencies to save RAM
+            npm prune --production
+
+            # 8. Run the vpsrebuild script 
             npm run vpsrebuild
