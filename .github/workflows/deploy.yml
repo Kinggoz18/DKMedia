@@ -25,22 +25,27 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # 1. Clean up old files
+            # 1. Force cleanup of the project folder
             rm -rf ~/dkmedia-website/DKMedia
             mkdir -p ~/dkmedia-website/DKMedia
             
-            # 2. Kill the previous PM2 instance
+            # 2. Kill the previous PM2 instance using full path logic
+            export PATH=$PATH:/usr/bin:/usr/local/bin
             pm2 delete dk-media-app || true
             
-            # 3. Clone the repo
-            git clone https://github.com/Kinggoz18/DKMedia ~/dkmedia-website
+            # 3. Clone directly into the target folder
+            # Note: We clone into a temp dir or specific path to avoid "not empty" errors
+            git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Kinggoz18/DKMedia ~/dkmedia-website/DKMedia
+            
             cd ~/dkmedia-website/DKMedia
             
-            # 4. Inject the Server .env
-            echo "${{ secrets.SERVER_ENV }}" > .env
+            # 4. Inject the Server .env safely (Heredoc prevents syntax errors)
+            cat << 'EOF' > .env
+            ${{ secrets.SERVER_ENV }}
+            EOF
             
-            # 5. Install production dependencies and start
+            # 5. Install and Start
             npm install --omit=dev
             
-            # Run the vpsrebuild script 
+            # Use the full path for npm/pm2 to be safe
             npm run vpsrebuild
