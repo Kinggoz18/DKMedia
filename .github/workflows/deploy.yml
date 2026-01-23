@@ -25,27 +25,30 @@ jobs:
           username: ${{ secrets.REMOTE_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            # 1. Force cleanup of the project folder
-            rm -rf ~/dkmedia-website/DKMedia
-            mkdir -p ~/dkmedia-website/DKMedia
+            # 1. Load NVM and Node paths
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            export PATH=$PATH:$HOME/.nvm/versions/node/$(nvm current)/bin:/usr/local/bin:/usr/bin
             
-            # 2. Kill the previous PM2 instance using full path logic
-            export PATH=$PATH:/usr/bin:/usr/local/bin
+            # 2. Clean up old files
+            rm -rf ~/dkmedia-website/DKMedia
+            
+            # 3. Kill the previous PM2 instance
+            # We use the full path logic to ensure pm2 is found
             pm2 delete dk-media-app || true
             
-            # 3. Clone directly into the target folder
-            # Note: We clone into a temp dir or specific path to avoid "not empty" errors
+            # 4. Clone the repo
             git clone https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Kinggoz18/DKMedia ~/dkmedia-website/DKMedia
             
             cd ~/dkmedia-website/DKMedia
             
-            # 4. Inject the Server .env safely (Heredoc prevents syntax errors)
+            # 5. Inject the Server .env safely
             cat << 'EOF' > .env
             ${{ secrets.SERVER_ENV }}
             EOF
             
-            # 5. Install and Start
+            # 6. Install production dependencies and start
             npm install --omit=dev
             
-            # Use the full path for npm/pm2 to be safe
+            # Run the vpsrebuild script 
             npm run vpsrebuild
