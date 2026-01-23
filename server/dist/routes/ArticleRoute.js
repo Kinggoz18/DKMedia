@@ -33,6 +33,12 @@ export class ArticleRoute {
             const addAtricleRoute = {
                 method: 'POST',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     body: AddArticleValidationSchema,
                     response: IReply.$schema,
@@ -43,6 +49,12 @@ export class ArticleRoute {
             const deleteArticleRoute = {
                 method: 'DELETE',
                 url: '/:id',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     params: RequestQueryValidation,
                     response: IReply.$schema,
@@ -53,11 +65,23 @@ export class ArticleRoute {
             const getAllArticleRoute = {
                 method: 'GET',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.getAllArticle(request, reply)
             };
             const getArticleByIdRoute = {
                 method: 'GET',
                 url: '/:id',
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.getArticleById(request, reply)
             };
             /******************************************* Register Routes *******************************************/

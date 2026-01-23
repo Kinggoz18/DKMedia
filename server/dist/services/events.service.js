@@ -2,6 +2,7 @@ import { EventModel } from "../schema/events.js";
 import { ObjectId } from "@fastify/mongodb";
 import { ReplyError } from "../interfaces/ReplyError.js";
 import { EventPriority } from "../Enums/eventPriority.js";
+import { isValidEventDate, isValidEndDate } from "../utils/validation.js";
 export class EventService {
     constructor(dbCollection, logger, r2BucketManager) {
         this.dbModel = EventModel;
@@ -14,7 +15,15 @@ export class EventService {
          */
         this.addEvent = async (request, reply) => {
             try {
-                const { title, date, image, priority, organizer, ticketLink } = request.body;
+                const { title, date, endTime, timezone, location, image, priority, organizer, ticketLink } = request.body;
+                // Validate event date is not in the past
+                if (!isValidEventDate(date)) {
+                    throw new ReplyError("Event date cannot be in the past", 400);
+                }
+                // Validate end date is after start date (if provided)
+                if (endTime && !isValidEndDate(date, endTime)) {
+                    throw new ReplyError("End date must be after start date", 400);
+                }
                 //Check if the maximum highlights has been added
                 if (priority === EventPriority.Highlight) {
                     const currentDateTime = new Date().toISOString().slice(0, 16);
@@ -30,6 +39,9 @@ export class EventService {
                 const newEvent = new this.dbModel({
                     title,
                     date,
+                    endTime: endTime || undefined,
+                    timezone: timezone || undefined,
+                    location: location || undefined,
                     image,
                     priority,
                     organizer,
@@ -137,14 +149,26 @@ export class EventService {
          */
         this.updateEventById = async (request, reply) => {
             try {
-                const { id, title, date, image, priority, organizer, ticketLink } = request.body;
+                const { id, title, date, endTime, timezone, location, image, priority, organizer, ticketLink } = request.body;
                 const event = await this.dbCollection.findOne({ _id: new ObjectId(id) });
                 if (!event?._id)
                     throw new ReplyError("Event does not exist", 404);
+                // Validate event date is not in the past (if date is being updated)
+                if (date && !isValidEventDate(date)) {
+                    throw new ReplyError("Event date cannot be in the past", 400);
+                }
+                // Validate end date is after start date (if both are provided)
+                const finalDate = date ?? event.date;
+                if (endTime && finalDate && !isValidEndDate(finalDate, endTime)) {
+                    throw new ReplyError("End date must be after start date", 400);
+                }
                 const updateResult = await this.dbCollection.updateOne({ _id: event?._id }, {
                     $set: {
                         title: title ?? event.title,
                         date: date ?? event.date,
+                        endTime: endTime !== undefined ? endTime : event.endTime,
+                        timezone: timezone !== undefined ? timezone : event.timezone,
+                        location: location !== undefined ? location : event.location,
                         image: image ?? event.image,
                         priority: priority ?? event.priority,
                         organizer: organizer ?? event.organizer,

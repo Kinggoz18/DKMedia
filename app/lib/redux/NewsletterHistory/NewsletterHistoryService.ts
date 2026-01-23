@@ -25,7 +25,6 @@ export default class NewsletterHistoryService {
       }
       return response.data as INewsletterHistoryResponse;
     } catch (error: any) {
-      console.log({ error })
       throw new Error(error?.response?.data?.data ?? error?.message ?? error)
     }
   }
@@ -59,7 +58,6 @@ export default class NewsletterHistoryService {
       }
       return response.data as INewsletterHistory;
     } catch (error: any) {
-      console.log({ error })
       throw new Error(error?.response?.data?.data ?? error?.message ?? error)
     }
   }

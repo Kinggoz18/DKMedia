@@ -61,7 +61,6 @@ export function LoginUser(userId: string): any {
         }
       }
     } catch (error: any) {
-      console.log({ error });
       throw new Error(error.message);
     }
   };

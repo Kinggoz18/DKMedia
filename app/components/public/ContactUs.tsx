@@ -7,6 +7,7 @@ import ThrowAsyncError, { toggleError } from "./ThrowAsyncError";
 import FeedbackPopup, { toggleFeedback } from "./FeedbackPopup";
 import Newsletter from "./Newsletter";
 import ProcessingIcon from "@/components/cms/ProcessingIcon";
+import { isValidEmail, isValidPhoneNumber } from "@/lib/utils/validation";
 
 export default function ContactUs() {
 
@@ -20,41 +21,38 @@ export default function ContactUs() {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const errorRef = useRef(null);
-  const feedbackRef = useRef(null);
+  const errorRef = useRef<HTMLDivElement | null>(null);
+  const feedbackRef = useRef<HTMLDivElement | null>(null);
 
   const [responseError, setResponseError] = useState("");
-
-  /**
-   * Check if the email is valid
-   */
-  const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const isValid = emailRegex.test(email);
-    if (!isValid) {
-      handleThrowError("Enter a valid email address");
-      return isValid;
-    }
-
-    return isValid;
-  };
 
   /**
    * Is the primary button active
    */
   const isBtnActive = () => {
-    if (firstname == "" || email === "" || subject == "" || message === "") return false;
+    if (firstname === "" || email === "" || subject === "" || message === "") return false;
     return true;
   }
 
-  function isValidPhoneNumber(phone: string): boolean {
-    const phoneRegex = /^(\+?\d{1,4}[-.\s]?)?(\(?\d{1,4}\)?[-.\s]?)?\d{3,4}[-.\s]?\d{4}$/;
-    const isValid = phoneRegex.test(email) || /^\d{10}$/.test(phone);
-    if (!isValid && phone != "") {
+  /**
+   * Validate email and show error if invalid
+   */
+  const validateEmail = (): boolean => {
+    if (!isValidEmail(email)) {
+      handleThrowError("Enter a valid email address");
+      return false;
+    }
+    return true;
+  }
+
+  /**
+   * Validate phone number and show error if invalid
+   */
+  const validatePhone = (): boolean => {
+    if (phone && !isValidPhoneNumber(phone)) {
       handleThrowError("Enter a valid phone number");
       return false;
     }
-
     return true;
   }
 
@@ -63,7 +61,13 @@ export default function ContactUs() {
    * @returns 
    */
   const onSendClick = async () => {
-    if (!isBtnActive() || !isValidEmail(email) || !isValidPhoneNumber(phone)) return;
+    if (!isBtnActive()) return;
+    
+    // Validate email
+    if (!validateEmail()) return;
+    
+    // Validate phone (optional field)
+    if (!validatePhone()) return;
 
     setIsSubmitting(true);
     try {
@@ -79,7 +83,7 @@ export default function ContactUs() {
 
       const response = await contactUsService.addContactUs(data)
       if (!response?._id) {
-        throw new Error("Sorry, something wen wrong");
+        throw new Error("Sorry, something went wrong");
       }
 
       setFirstname("");

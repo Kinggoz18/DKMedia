@@ -10,7 +10,7 @@ import ThrowAsyncError, { toggleError } from '@/components/cms/ThrowAsyncError';
 import ProcessingIcon from '@/components/cms/ProcessingIcon';
 
 interface ArticlesListProps {
-  allArticles: [IArticle],
+  allArticles: IArticle[],
   onDeleteClick: (id: string) => void
 }
 
@@ -47,11 +47,11 @@ export default function ManageMedia() {
   const errorRef = useRef<HTMLDivElement>(null);
   const [responseError, setResponseError] = useState("");
 
-  const [articleData, setArticleData] = useState<[IArticle]>([{
-    _id: "",
-    title: "",
-    link: ""
-  }]);
+  const [articleData, setArticleData] = useState<IArticle[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalArticles, setTotalArticles] = useState(0);
 
   /**
    * Trigger delete popup
@@ -68,15 +68,23 @@ export default function ManageMedia() {
    * Confirm delete article action
    */
   async function onYesDeleteClick() {
+    setIsUploading(true);
     try {
       await articleService.deleteArticle(articleToDelete);
-      setIsDeletePopup(false)
+      setIsDeletePopup(false);
       setArticleToDelete("");
-      await fetchAllArticles();
+      // If we're on the last page and it becomes empty after deletion, go to previous page
+      if (currentPage > 1 && safeArticles.length === 1) {
+        setCurrentPage(currentPage - 1);
+      } else {
+        await fetchAllArticles(currentPage);
+      }
+      setIsUploading(false);
     } catch (error: any) {
-      setIsDeletePopup(false)
+      setIsDeletePopup(false);
       setArticleToDelete("");
-      handleThrowError(error?.message)
+      setIsUploading(false);
+      handleThrowError(error?.message || 'Failed to delete article');
     }
   }
 
@@ -109,16 +117,36 @@ export default function ManageMedia() {
   /**
    * Fetch all articles
    */
-  async function fetchAllArticles() {
-    const allArticles = await articleService.getAllArticle();
-    setArticleData(allArticles)
+  async function fetchAllArticles(page: number = 1) {
+    try {
+      const response = await articleService.getAllArticle(page, itemsPerPage);
+      // Handle both old format (array) and new format (object with articles and pagination)
+      if (Array.isArray(response)) {
+        setArticleData(response);
+        setTotalArticles(response.length);
+        setTotalPages(1);
+      } else {
+        setArticleData(response.articles);
+        setTotalArticles(response.pagination.total);
+        setTotalPages(response.pagination.totalPages);
+      }
+    } catch (error: any) {
+      console.error('Error fetching articles:', error);
+      handleThrowError(error?.message || 'Failed to fetch articles');
+      setArticleData([]);
+      setTotalArticles(0);
+      setTotalPages(1);
+    }
   }
 
   useEffect(() => {
-    fetchAllArticles();
-  }, []);
+    fetchAllArticles(currentPage);
+  }, [currentPage]);
 
-  const safeArticles = Array.isArray(articleData) && articleData.length > 0 && articleData[0]?._id !== "" ? articleData : [];
+  // Filter out any articles with empty _id (placeholder data)
+  const safeArticles = Array.isArray(articleData) 
+    ? articleData.filter(article => article?._id && article._id !== "")
+    : [];
 
   return (
     <>
@@ -137,7 +165,7 @@ export default function ManageMedia() {
         <div className='glass-card flex flex-col w-full flex-1 min-h-[400px] gap-y-4 rounded-xl p-5 lg:p-6'>
           <div className='flex items-center justify-between mb-2'>
             <h2 className='text-lg lg:text-xl font-bold text-white'>Published Articles</h2>
-            <span className="text-sm text-neutral-500">{safeArticles.length} articles</span>
+            <span className="text-sm text-neutral-500">{totalArticles} articles</span>
           </div>
           {safeArticles.length > 0 ? (
             <div className='w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto flex-1 pb-4 scrollbar-thin'>
@@ -154,6 +182,29 @@ export default function ManageMedia() {
             </div>
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between mt-4 pt-4 border-t border-neutral-800">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 rounded-lg bg-neutral-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-700 transition-colors"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-neutral-400">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 rounded-lg bg-neutral-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-700 transition-colors"
+            >
+              Next
+            </button>
+          </div>
+        )}
 
         <div className="flex justify-center lg:justify-start">
           <PrimaryButton title="Add Article" onBtnClick={onUploadArticleClick} />

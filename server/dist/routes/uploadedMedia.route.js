@@ -41,6 +41,12 @@ export class UploadMediaRoute {
             const addMedia = {
                 method: 'POST',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     body: UploadedMediaValidation,
                     response: IReply.$schema,
@@ -54,6 +60,12 @@ export class UploadMediaRoute {
             const deleteMedia = {
                 method: 'DELETE',
                 url: '/:id',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     params: RequestQueryValidation,
                     response: IReply.$schema,
@@ -67,6 +79,12 @@ export class UploadMediaRoute {
             const getAllMediaRoute = {
                 method: 'GET',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.getAllMedia(request, reply)
             };
             /**
@@ -75,6 +93,12 @@ export class UploadMediaRoute {
             const getMediaByIdRoute = {
                 method: 'GET',
                 url: '/:id',
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.getMediaById(request, reply)
             };
             /******************************************* Register Routes *******************************************/

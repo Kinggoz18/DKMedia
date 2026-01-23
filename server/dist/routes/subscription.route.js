@@ -55,6 +55,12 @@ export class SubscriptionRoute {
             const deleteSubscriptionRoute = {
                 method: 'DELETE',
                 url: '/:id',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     params: RequestQueryValidation,
                     response: IReply.$schema,
@@ -68,6 +74,12 @@ export class SubscriptionRoute {
             const getAllSubscriptionRoute = {
                 method: 'GET',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.getAllSubscription(request, reply)
             };
             /**
@@ -76,6 +88,12 @@ export class SubscriptionRoute {
             const getSubscriptionByIdRoute = {
                 method: 'GET',
                 url: '/:id',
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.getSubscription(request, reply)
             };
             /**
@@ -98,6 +116,12 @@ export class SubscriptionRoute {
             const sendBulkNewsletterRoute = {
                 method: 'POST',
                 url: '/send-newsletter',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     body: {
                         type: 'object',
@@ -119,6 +143,12 @@ export class SubscriptionRoute {
             const scheduleBulkNewsletterRoute = {
                 method: 'POST',
                 url: '/schedule-newsletter',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     body: {
                         type: 'object',

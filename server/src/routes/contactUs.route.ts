@@ -68,6 +68,12 @@ export class ContactUsRoute implements IRoute<ContactUsDocument> {
       const deleteContactRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: RequestQueryValidationType, Reply: IReplyType }> = {
         method: 'DELETE',
         url: '/:id',
+        config: {
+          rateLimit: {
+            max: 5,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         schema: {
           params: RequestQueryValidation,
           response: IReply.$schema,
@@ -79,12 +85,24 @@ export class ContactUsRoute implements IRoute<ContactUsDocument> {
       const getAllContactRoute: RouteOptions<Server, IncomingMessage, ServerResponse> = {
         method: 'GET',
         url: '/',
+        config: {
+          rateLimit: {
+            max: 15,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         handler: (request, reply) => this.service.getAllContact(request, reply)
       }
 
       const getContactInquiryByIdRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: RequestQueryValidationType, Reply: IReplyType }> = {
         method: 'GET',
         url: '/:id',
+        config: {
+          rateLimit: {
+            max: 15,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         handler: (request, reply) => this.service.getContactInquiryById(request, reply)
       }
 
@@ -95,6 +113,12 @@ export class ContactUsRoute implements IRoute<ContactUsDocument> {
       }> = {
         method: 'POST',
         url: '/:id/reply',
+        config: {
+          rateLimit: {
+            max: 5,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         schema: {
           params: RequestQueryValidation,
           body: {

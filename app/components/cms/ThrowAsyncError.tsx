@@ -11,12 +11,12 @@ export const toggleError = (errorRef: React.RefObject<HTMLDivElement | null>) =>
 
   errRef.classList.remove("opacity-0");
   errRef.classList.remove("!z-[-10]");
-  errRef.classList.add("z-30");
+  errRef.classList.add("z-[50]");
 
   setTimeout(() => {
     errRef.classList.add("opacity-0");
     errRef.classList.add("!z-[-10]");
-    errRef.classList.remove("z-30");
+    errRef.classList.remove("z-[50]");
   }, 3000);
 };
 

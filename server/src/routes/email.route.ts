@@ -44,6 +44,12 @@ export class EmailRoute {
       const getEmailStatsRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Reply: IReplyType }> = {
         method: 'GET',
         url: '/stats',
+        config: {
+          rateLimit: {
+            max: 15,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         // Removed preHandler: this.protectMiddleware - GET route doesn't need protection
         handler: async (request, reply) => {
           try {

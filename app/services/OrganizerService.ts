@@ -22,7 +22,6 @@ export default class OrganizerService {
   //     }
   //     return response.data as IOrganizer;
   //   } catch (error: any) {
-  //     console.log({ error })
   //     throw new Error(error?.response?.data?.data ?? error?.response?.data?.messageerror?.message ?? error)
   //   }
   // }
@@ -40,7 +39,6 @@ export default class OrganizerService {
   //     }
   //     return response.data as string;
   //   } catch (error: any) {
-  //     console.log({ error })
   //     throw new Error(error?.response?.data?.data ?? error?.response?.data?.messageerror?.message ?? error)
   //   }
   // }
@@ -58,8 +56,7 @@ export default class OrganizerService {
       }
       return response.data as [IOrganizer];
     } catch (error: any) {
-      console.log({ error })
-      throw new Error(error?.response?.data?.data ?? error?.response?.data?.messageerror?.message ?? error)
+      throw new Error(error?.response?.data?.data ?? error?.response?.data?.message ?? error?.message ?? error)
     }
   }
 
@@ -76,8 +73,7 @@ export default class OrganizerService {
       }
       return response.data as IOrganizer;
     } catch (error: any) {
-      console.log({ error })
-      throw new Error(error?.response?.data?.data ?? error?.response?.data?.messageerror?.message ?? error)
+      throw new Error(error?.response?.data?.data ?? error?.response?.data?.message ?? error?.message ?? error)
     }
   }
 
@@ -94,7 +90,6 @@ export default class OrganizerService {
   //     }
   //     return response.data as IOrganizer;
   //   } catch (error: any) {
-  //     console.log({ error })
   //     throw new Error(error?.response?.data?.data ?? error?.response?.data?.messageerror?.message ?? error)
   //   }
   // }

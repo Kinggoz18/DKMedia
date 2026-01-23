@@ -35,6 +35,12 @@ export class AboutUsRoute {
             const updateAboutUsRoute = {
                 method: 'POST',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     body: AddAboutUsValidation,
                     response: IReply.$schema,
@@ -48,6 +54,12 @@ export class AboutUsRoute {
             const deleteAboutUsRoute = {
                 method: 'DELETE',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     response: IReply.$schema,
                 },
@@ -60,6 +72,12 @@ export class AboutUsRoute {
             const getAboutUs = {
                 method: 'GET',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.getAboutUs(request, reply)
             };
             /******************************************* Register Routes *******************************************/

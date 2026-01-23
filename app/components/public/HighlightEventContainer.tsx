@@ -1,22 +1,20 @@
 import { forwardRef } from 'react';
 import EventContainerProps from '@/lib/interfaces/props/EventContainerProps';
+import { formatTimeInTimezone, formatDateInTimezone } from '@/lib/utils/timezones';
 
-const formatDate = (date: string): string => {
-  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const formatStartTime = (startDate: string, timezone?: string): string => {
   try {
-    const newDate = new Date(date);
-    const day = newDate.getDate();
-    const month = months[newDate.getMonth()];
-    return `${month} ${day}`
+    const tz = timezone || 'UTC';
+    return formatTimeInTimezone(startDate, tz);
   } catch {
-    return date;
+    return '';
   }
 }
 
-const formatTime = (date: string): string => {
+const formatEndTime = (endTime: string, timezone?: string): string => {
   try {
-    const newDate = new Date(date);
-    return newDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    const tz = timezone || 'UTC';
+    return formatTimeInTimezone(endTime, tz);
   } catch {
     return '';
   }
@@ -26,13 +24,19 @@ const HighlightEventContainer = forwardRef<HTMLDivElement, EventContainerProps>(
   const {
     title,
     date,
+    endTime,
+    timezone,
+    location,
     image,
     organizer,
     ticketLink
   } = props;
 
-  const formattedDate = formatDate(date);
-  const formattedTime = formatTime(date);
+  // Format date in the event's timezone (or UTC if not specified)
+  const eventTimezone = timezone || 'UTC';
+  const formattedDate = formatDateInTimezone(date, eventTimezone, 'long');
+  const startTime = formatStartTime(date, timezone);
+  const endTimeFormatted = endTime ? formatEndTime(endTime, timezone) : null;
 
   return (
     <div className="relative flex flex-col lg:flex-row w-full max-w-[1000px] mx-auto items-center gap-4 md:gap-6 lg:gap-12 min-h-0 flex-1 transition-all duration-700 ease-in-out opacity-100" ref={ref}>
@@ -58,15 +62,42 @@ const HighlightEventContainer = forwardRef<HTMLDivElement, EventContainerProps>(
 
       {/* Event Info - Luxury Typography */}
       <div className="flex flex-col gap-4 md:gap-5 lg:gap-8 flex-1 text-center lg:text-left min-h-0 justify-center">
-        {/* Date */}
-        <div className="text-luxury-sm text-xs tracking-[0.25em] text-[#a8a8a8] relative z-[5]">
-          {formattedDate} {formattedTime && `• ${formattedTime}`}
+        {/* Date and Time Info with dark blurry background */}
+        <div className="backdrop-blur-md bg-black/60 rounded-lg px-5 py-4 border border-white/10 relative z-[5]">
+          <div className="text-luxury-sm text-xs tracking-[0.15em] text-white space-y-2">
+            <div className="flex items-center gap-3 justify-center lg:justify-start">
+              <span className="text-[#c9a962] text-[10px] font-medium">DATE:</span>
+              <span>{formattedDate}</span>
+            </div>
+            {startTime && (
+              <div className="flex items-center gap-3 justify-center lg:justify-start">
+                <span className="text-[#c9a962] text-[10px] font-medium">START:</span>
+                <span>{startTime}</span>
+              </div>
+            )}
+            {endTimeFormatted && (
+              <div className="flex items-center gap-3 justify-center lg:justify-start">
+                <span className="text-[#c9a962] text-[10px] font-medium">END:</span>
+                <span>{endTimeFormatted}</span>
+              </div>
+            )}
+            {location && (
+              <div className="flex items-center gap-3 justify-center lg:justify-start">
+                <svg className="w-4 h-4 text-[#c9a962] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="lowercase">{location}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Title */}
         <h2 className="h1-luxury text-xl md:text-2xl lg:text-5xl xl:text-6xl leading-tight text-white relative z-[5]">
           {title}
         </h2>
+
 
         {/* Organizer */}
         {organizer && (

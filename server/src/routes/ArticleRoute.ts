@@ -52,6 +52,12 @@ export class ArticleRoute implements IRoute<ArticleDocument> {
       const addAtricleRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Body: AddArticleValidationType, Reply: IReplyType }> = {
         method: 'POST',
         url: '/',
+        config: {
+          rateLimit: {
+            max: 5,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         schema: {
           body: AddArticleValidationSchema,
           response: IReply.$schema,
@@ -63,6 +69,12 @@ export class ArticleRoute implements IRoute<ArticleDocument> {
       const deleteArticleRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: RequestQueryValidationType, Reply: IReplyType }> = {
         method: 'DELETE',
         url: '/:id',
+        config: {
+          rateLimit: {
+            max: 5,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         schema: {
           params: RequestQueryValidation,
           response: IReply.$schema,
@@ -71,15 +83,27 @@ export class ArticleRoute implements IRoute<ArticleDocument> {
         handler: (request, reply) => this.service.deleteArticle(request, reply)
       }
 
-      const getAllArticleRoute: RouteOptions<Server, IncomingMessage, ServerResponse> = {
+      const getAllArticleRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Querystring: { page?: string; limit?: string } }> = {
         method: 'GET',
         url: '/',
+        config: {
+          rateLimit: {
+            max: 15,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         handler: (request, reply) => this.service.getAllArticle(request, reply)
       }
 
       const getArticleByIdRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: RequestQueryValidationType, Reply: IReplyType }> = {
         method: 'GET',
         url: '/:id',
+        config: {
+          rateLimit: {
+            max: 15,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         handler: (request, reply) => this.service.getArticleById(request, reply)
       }
 

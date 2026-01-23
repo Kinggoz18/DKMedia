@@ -71,8 +71,7 @@ export class ContactUsService {
       }
       return response.data as IContactUs;
     } catch (error: any) {
-      console.log(error);
-      throw new Error(error?.response?.data?.data ?? error?.response?.data?.messageerror?.message ?? error)
+      throw new Error(error?.response?.data?.data ?? error?.response?.data?.message ?? error?.message ?? error)
     }
   }
 }

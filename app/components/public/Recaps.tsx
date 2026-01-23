@@ -8,13 +8,18 @@ import IMedia from '@/lib/interfaces/IMedia';
 export default function Recaps() {
   const [allRecaps, setAllRecaps] = useState<IMedia[]>([]);
 
-  // Fetch media client-side
+  // Fetch media client-side - only fetch first 8 items for the preview
   useEffect(() => {
     async function fetchMedia() {
       try {
         const mediaService = new MediaService();
-        const media = await mediaService.getAllMedia();
-        setAllRecaps(Array.isArray(media) ? media : []);
+        const response = await mediaService.getAllMedia(1, 8);
+        // Handle both old format (array) and new format (object with media and pagination)
+        if (Array.isArray(response)) {
+          setAllRecaps(response);
+        } else {
+          setAllRecaps(response.media || []);
+        }
       } catch (error: any) {
         console.error('Failed to fetch media:', error);
         setAllRecaps([]);

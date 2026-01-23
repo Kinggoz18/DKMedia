@@ -1,0 +1,56 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install & Build
+        # We build on GitHub to save the Droplet's 1GB RAM
+        run: |
+          npm ci
+          npm run build
+        env:
+          NODE_ENV: production
+          VITE_API_URL: "/api/v1"
+
+      - name: Deploy & Restart via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.REMOTE_HOST }}
+          username: ${{ secrets.REMOTE_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # 1. Clean up old files
+            rm -rf ~/dkmedia-website/DKMedia
+            mkdir -p ~/dkmedia-website/DKMedia
+            
+            # 2. Kill the previous PM2 instance
+            pm2 delete dk-media-app || true
+            
+            # 3. Clone the repo
+            git clone https://github.com/Kinggoz18/DKMedia ~/dkmedia-website
+            cd ~/dkmedia-website/DKMedia
+            
+            # 4. Inject the Server .env
+            echo "${{ secrets.SERVER_ENV }}" > .env
+            
+            # 5. Install production dependencies and start
+            npm install --omit=dev
+            
+            # Run your vpsrebuild script (which contains build:client/server and pm2 start)
+            # Note: Since we built on GitHub, you could skip the build here to save RAM,
+            # but if you want to run your script exactly:
+            npm run vpsrebuild

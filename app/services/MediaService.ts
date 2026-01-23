@@ -22,7 +22,6 @@ export default class MediaService {
   //     }
   //     return response.data as IMedia;
   //   } catch (error: any) {
-  //     console.log({ error })
   //     throw new Error(error?.response?.data?.data ?? error?.response?.data?.messageerror?.message ?? error)
   //   }
   // }
@@ -40,26 +39,39 @@ export default class MediaService {
   //     }
   //     return response.data as string;
   //   } catch (error: any) {
-  //     console.log({ error })
   //     throw new Error(error?.response?.data?.data ?? error?.response?.data?.messageerror?.message ?? error)
   //   }
   // }
 
   /**
    * GET all media
-   * @param mediaToAdd 
+   * @param page Page number (default: 1)
+   * @param limit Items per page (default: 20)
    * @returns 
    */
-  async getAllMedia() {
+  async getAllMedia(page: number = 1, limit: number = 20) {
     try {
-      const response = (await axios.get(`${this.apiUrl}`)).data as IResponse;
+      const response = (await axios.get(`${this.apiUrl}`, {
+        params: { page, limit }
+      })).data as IResponse;
       if (!response.success) {
         throw new Error(response.data)
       }
-      return response.data as [IMedia];
+      // Handle both old format (array) and new format (object with media and pagination)
+      if (Array.isArray(response.data)) {
+        return {
+          media: response.data as IMedia[],
+          pagination: {
+            page: 1,
+            limit: response.data.length,
+            total: response.data.length,
+            totalPages: 1
+          }
+        };
+      }
+      return response.data as { media: IMedia[]; pagination: { page: number; limit: number; total: number; totalPages: number } };
     } catch (error: any) {
-      console.log({ error })
-      throw new Error(error?.response?.data?.data ?? error?.response?.data?.messageerror?.message ?? error)
+      throw new Error(error?.response?.data?.data ?? error?.response?.data?.message ?? error?.message ?? error)
     }
   }
 
@@ -76,8 +88,7 @@ export default class MediaService {
       }
       return response.data as IMedia;
     } catch (error: any) {
-      console.log({ error })
-      throw new Error(error?.response?.data?.data ?? error?.response?.data?.messageerror?.message ?? error)
+      throw new Error(error?.response?.data?.data ?? error?.response?.data?.message ?? error?.message ?? error)
     }
   }
 }

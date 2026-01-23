@@ -15,16 +15,6 @@ const AppRoutes = (defineRoutes: any) =>
 
     /**************** CMS Routes ********************/
     route("cms", "routes/cms/index.tsx")
-    // route("cms", "routes/cms/index.tsx", () => {
-    //   route("sections/about-us", "routes/cms/sections/about-us.tsx");
-    //   route("sections/home", "routes/cms/sections/home.tsx");
-    //   route("sections/manage-articles", "routes/cms/sections/manage-articles.tsx");
-    //   route("sections/manage-contact-us", "routes/cms/sections/manage-contact-us.tsx");
-    //   route("sections/manage-events", "routes/cms/sections/manage-events.tsx");
-    //   route("sections/manage-media", "routes/cms/sections/manage-media.tsx");
-    //   route("sections/manage-organizations", "routes/cms/sections/manage-organizations.tsx");
-    //   route("sections/subscriptions", "routes/cms/sections/subscriptions.tsx");
-    // });
 
     /**************** Catch-all Route ********************/
     route("*", "routes/routes/$.tsx");

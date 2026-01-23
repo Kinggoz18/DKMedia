@@ -67,7 +67,7 @@ export class UploadedMediaService {
                 if (deleteResult.deletedCount != 1) {
                     throw new ReplyError("Failed to delete media", 400);
                 }
-                return reply.code(200).send({ data: "Media and associated file deleted", success: true });
+                return reply.code(200).send({ data: "deleted successfuly", success: true });
             }
             catch (error) {
                 request.log.error(error?.message);
@@ -108,8 +108,29 @@ export class UploadedMediaService {
          */
         this.getAllMedia = async (request, reply) => {
             try {
-                const allMedia = await this.dbCollection.find({}).toArray();
-                return reply.code(200).send({ data: allMedia, success: true });
+                const page = parseInt(request.query.page || '1', 10);
+                const limit = parseInt(request.query.limit || '20', 10);
+                const skip = (page - 1) * limit;
+                const [media, total] = await Promise.all([
+                    this.dbCollection.find({})
+                        .sort({ createdAt: -1 })
+                        .skip(skip)
+                        .limit(limit)
+                        .toArray(),
+                    this.dbCollection.countDocuments({})
+                ]);
+                return reply.status(200).send({
+                    success: true,
+                    data: {
+                        media,
+                        pagination: {
+                            page,
+                            limit,
+                            total,
+                            totalPages: Math.ceil(total / limit)
+                        }
+                    }
+                });
             }
             catch (error) {
                 request.log.error(error?.message);

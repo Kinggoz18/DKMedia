@@ -4,6 +4,9 @@ import { EventPriority } from "../Enums/eventPriority.js";
 export const EventMongooseSchema = new Schema({
     title: { type: String },
     date: { type: String },
+    endTime: { type: String },
+    timezone: { type: String },
+    location: { type: String },
     image: { type: String },
     priority: {
         type: String,
@@ -17,6 +20,9 @@ export const EventMongooseSchema = new Schema({
 export const EventMongooseSubSchema = new Schema({
     title: { type: String },
     date: { type: String },
+    endTime: { type: String },
+    timezone: { type: String },
+    location: { type: String },
     image: { type: String },
     priority: {
         type: String,

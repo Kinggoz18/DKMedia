@@ -19,7 +19,6 @@ export class ArticleService {
       }
       return response.data as IArticle;
     } catch (error: any) {
-      console.log(error);
       throw new Error(error?.response?.data?.data ?? error?.message ?? error)
     }
   }
@@ -32,7 +31,6 @@ export class ArticleService {
       }
       return response.data as string;
     } catch (error: any) {
-      console.log(error);
       throw new Error(error?.response?.data?.data ?? error?.message ?? error)
     }
   }
@@ -45,20 +43,32 @@ export class ArticleService {
       }
       return response.data as IArticle;
     } catch (error: any) {
-      console.log(error);
       throw new Error(error?.response?.data?.data ?? error?.message ?? error)
     }
   }
 
-  async getAllArticle() {
+  async getAllArticle(page: number = 1, limit: number = 20) {
     try {
-      const response = (await apiClient.get(`${this.apiUrl}`)).data as IResponse;
+      const response = (await apiClient.get(`${this.apiUrl}`, {
+        params: { page, limit }
+      })).data as IResponse;
       if (!response.success) {
         throw new Error(response.data)
       }
-      return response.data as [IArticle];
+      // Handle both old format (array) and new format (object with articles and pagination)
+      if (Array.isArray(response.data)) {
+        return {
+          articles: response.data as IArticle[],
+          pagination: {
+            page: 1,
+            limit: response.data.length,
+            total: response.data.length,
+            totalPages: 1
+          }
+        };
+      }
+      return response.data as { articles: IArticle[]; pagination: { page: number; limit: number; total: number; totalPages: number } };
     } catch (error: any) {
-      console.log(error);
       throw new Error(error?.response?.data?.data ?? error?.message ?? error)
     }
   }

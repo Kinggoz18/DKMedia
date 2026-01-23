@@ -6,6 +6,9 @@ export default interface EventContainerProps {
   _id?: string;
   title: string;
   date: string;
+  endTime?: string;
+  timezone?: string;
+  location?: string;
   image: string;
   priority: EventPriority;
   ticketLink: string;

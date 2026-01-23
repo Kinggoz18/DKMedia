@@ -37,8 +37,6 @@ export const createApiClient = (): AxiosInstance => {
 
         if (csrfToken) {
           config.headers['X-CSRF-Token'] = csrfToken;
-        } else {
-          console.warn('CSRF token not found in localStorage for protected request');
         }
       }
 

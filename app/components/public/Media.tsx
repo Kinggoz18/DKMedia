@@ -12,6 +12,10 @@ export default function Media(props: MediaPageProps) {
   const [activeFilter, setActiveFilter] = useState<'all' | 'images' | 'videos'>('all');
   const [selectedTag, setSelectedTag] = useState<string | null>(initialTag || null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalMedia, setTotalMedia] = useState(0);
 
   // Fetch media client-side
   useEffect(() => {
@@ -19,18 +23,29 @@ export default function Media(props: MediaPageProps) {
       try {
         setIsLoading(true);
         const mediaService = new MediaService();
-        const media = await mediaService.getAllMedia();
-        setAllMedia(Array.isArray(media) ? media : []);
+        const response = await mediaService.getAllMedia(currentPage, itemsPerPage);
+        // Handle both old format (array) and new format (object with media and pagination)
+        if (Array.isArray(response)) {
+          setAllMedia(response);
+          setTotalMedia(response.length);
+          setTotalPages(1);
+        } else {
+          setAllMedia(response.media || []);
+          setTotalMedia(response.pagination?.total || 0);
+          setTotalPages(response.pagination?.totalPages || 1);
+        }
       } catch (error: any) {
         console.error('Failed to fetch media:', error);
         setAllMedia([]);
+        setTotalMedia(0);
+        setTotalPages(1);
       } finally {
         setIsLoading(false);
       }
     }
 
     fetchMedia();
-  }, []);
+  }, [currentPage]);
 
   // Ensure allMedia is always an array to prevent crashes
   const safeMedia = Array.isArray(allMedia) ? allMedia : [];
@@ -156,7 +171,7 @@ export default function Media(props: MediaPageProps) {
       {/* Results Count */}
       <div className="px-4 lg:px-10 mb-4">
         <p className="text-neutral-500 text-sm">
-          Showing {filteredMedia.length} of {safeMedia.length} items
+          Showing {filteredMedia.length} of {totalMedia} items
           {selectedTag && <span className="text-primary-400"> • Filtered by #{selectedTag}</span>}
         </p>
       </div>
@@ -222,6 +237,29 @@ export default function Media(props: MediaPageProps) {
             </div>
             <h3 className="text-xl font-semibold text-white mb-2">No media found</h3>
             <p className="text-neutral-500">Try adjusting your filters or search query</p>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-4 mt-8 pt-8 border-t border-neutral-800/50">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-6 py-2.5 rounded-xl bg-neutral-800/50 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-700/50 transition-colors font-medium"
+            >
+              Previous
+            </button>
+            <span className="px-4 py-2 text-neutral-400 text-sm">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="px-6 py-2.5 rounded-xl bg-neutral-800/50 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-700/50 transition-colors font-medium"
+            >
+              Next
+            </button>
           </div>
         )}
       </div>

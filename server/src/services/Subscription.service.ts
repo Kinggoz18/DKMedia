@@ -7,6 +7,7 @@ import { AddSubscriptionValidationType } from "../types/subscription.type.js";
 import { SubscriptionDocument, SubscriptionModel } from "../schema/subscription.js";
 import { ReplyError } from "../interfaces/ReplyError.js";
 import EmailServiceFactory from "./EmailService.js";
+import { isValidEmail } from "../utils/validation.js";
 
 export class SubscriptionService implements IService<SubscriptionDocument> {
   dbModel = SubscriptionModel;
@@ -38,6 +39,11 @@ export class SubscriptionService implements IService<SubscriptionDocument> {
         lastName,
         email,
       } = request.body;
+
+      // Validate email format
+      if (!isValidEmail(email)) {
+        throw new ReplyError("Invalid email address format", 400);
+      }
 
       //Validate new subscription
       const newSubscription = new this.dbModel({

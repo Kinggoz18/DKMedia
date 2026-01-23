@@ -21,7 +21,6 @@ export default class SubscriptionService {
   //     }
   //     return response.data as ISubscription
   //   } catch (error: any) {
-  //     console.log({ error })
   //     throw new Error(error.message)
   //   }
   // }
@@ -40,7 +39,6 @@ export default class SubscriptionService {
       }
       return response.data as string
     } catch (error: any) {
-      console.log({ error })
       throw new Error(error?.response?.data?.data ?? error?.message ?? error)
     }
   }
@@ -58,7 +56,6 @@ export default class SubscriptionService {
       }
       return response.data as ISubscription
     } catch (error: any) {
-      console.log({ error })
       throw new Error(error?.response?.data?.data ?? error?.message ?? error)
     }
   }
@@ -85,7 +82,6 @@ export default class SubscriptionService {
         }
       }
     } catch (error: any) {
-      console.log({ error })
       throw new Error(error?.response?.data?.data ?? error?.message ?? error)
     }
   }
@@ -109,7 +105,6 @@ export default class SubscriptionService {
       }
       return response.data as string;
     } catch (error: any) {
-      console.log({ error })
       throw new Error(error?.response?.data?.data ?? error?.message ?? error)
     }
   }
@@ -135,7 +130,6 @@ export default class SubscriptionService {
       }
       return response.data as string;
     } catch (error: any) {
-      console.log({ error })
       throw new Error(error?.response?.data?.data ?? error?.message ?? error)
     }
   }

@@ -3,6 +3,7 @@ import { ContactUsModel } from "../schema/contactUs.js";
 import { ReplyError } from "../interfaces/ReplyError.js";
 import EmailServiceFactory from "./EmailService.js";
 import { generateContactInquiryEmail } from "../util/emailTemplate.js";
+import { isValidEmail, isValidPhoneNumber, containsProfanity } from "../utils/validation.js";
 import dotenv from 'dotenv';
 dotenv.config();
 export class ContactUsService {
@@ -16,6 +17,18 @@ export class ContactUsService {
         this.addContact = async (request, reply) => {
             try {
                 const { company, firstName, subject, lastName, email, phone, message, } = request.body;
+                // Validate email format
+                if (!isValidEmail(email)) {
+                    throw new ReplyError("Invalid email address format", 400);
+                }
+                // Validate phone number format (if provided)
+                if (phone && !isValidPhoneNumber(phone)) {
+                    throw new ReplyError("Invalid phone number format", 400);
+                }
+                // Check for profanity in message
+                if (containsProfanity(message)) {
+                    throw new ReplyError("Your message contains inappropriate language. Please revise your message.", 400);
+                }
                 //Validate the request 
                 const contactUs = new this.dbModel({
                     company,

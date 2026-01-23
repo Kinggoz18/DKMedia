@@ -25,7 +25,6 @@ function Login() {
         await authService.authenticateUser(mode);
       }
     } catch (error: any) {
-      console.log({ error })
       handleThrowError(error?.message ?? error)
     }
   }

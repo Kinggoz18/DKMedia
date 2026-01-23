@@ -3,7 +3,7 @@ import { mediaType } from "../Enums/mediaType.js";
 
 export const UploadedMediaValidation = Type.Object({
   mediaType: Type.Enum(mediaType),
-  mediaLink: Type.String({ format: 'uri' }),
+  mediaLink: Type.String(),
   eventTag: Type.Optional(Type.Unknown()),
   hashtags: Type.Optional(Type.Array(Type.String())),
   caption: Type.Optional(Type.String())

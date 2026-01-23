@@ -53,7 +53,7 @@ export class ContactService {
       }
       return response.data as IContact;
     } catch (error: any) {
-      throw new Error(error?.response?.data?.data ?? error?.response?.data?.messageerror?.message ?? error)
+      throw new Error(error?.response?.data?.data ?? error?.response?.data?.message ?? error?.message ?? error)
     }
   }
 

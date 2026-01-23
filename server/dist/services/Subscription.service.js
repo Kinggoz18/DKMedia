@@ -2,6 +2,7 @@ import { ObjectId } from "@fastify/mongodb";
 import { SubscriptionModel } from "../schema/subscription.js";
 import { ReplyError } from "../interfaces/ReplyError.js";
 import EmailServiceFactory from "./EmailService.js";
+import { isValidEmail } from "../utils/validation.js";
 export class SubscriptionService {
     constructor(dbCollection, logger) {
         this.dbModel = SubscriptionModel;
@@ -14,6 +15,10 @@ export class SubscriptionService {
         this.addSubscription = async (request, reply) => {
             try {
                 const { firstName, lastName, email, } = request.body;
+                // Validate email format
+                if (!isValidEmail(email)) {
+                    throw new ReplyError("Invalid email address format", 400);
+                }
                 //Validate new subscription
                 const newSubscription = new this.dbModel({
                     firstName,

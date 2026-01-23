@@ -143,7 +143,6 @@ export default function ManageContactUs() {
       const data = await contactUsService.getAllContactUsInquiry();
       setAllInquires(data)
     } catch (error: any) {
-      console.log({ error })
       handleThrowError(error?.message)
     }
   }
@@ -156,7 +155,6 @@ export default function ManageContactUs() {
       const data = await contactService.getContacts();
       setContactInfo(data)
     } catch (error: any) {
-      console.log({ error })
       handleThrowError(error?.message)
     }
   }

@@ -28,7 +28,7 @@ export default function UpcomingEvent(props: UpcomingEventProps) {
    */
   function onNextMobileEvent() {
     if (!upcomingEvents || upcomingEvents.length === 0) return;
-    
+
     setMobileIndex((prevIndex) => {
       const updatedIndex = (prevIndex + 1) % upcomingEvents.length;
       const mobileEventContainer = mobileEventContainerRef.current;
@@ -50,7 +50,7 @@ export default function UpcomingEvent(props: UpcomingEventProps) {
    */
   function onPrevMobileEvent() {
     if (!upcomingEvents || upcomingEvents.length === 0) return;
-    
+
     setMobileIndex((prevIndex) => {
       let updatedIndex = (prevIndex - 1) % upcomingEvents.length;
       const mobileEventContainer = mobileEventContainerRef.current;
@@ -85,10 +85,10 @@ export default function UpcomingEvent(props: UpcomingEventProps) {
    */
   function onNextHighlightEvent() {
     if (!upcomingHighlights || upcomingHighlights.length === 0) return;
-    
+
     // Reset auto-advance timer when user interacts
     resetAutoAdvance();
-    
+
     setHighlighyIndex((prevIndex) => {
       const updatedIndex = (prevIndex + 1) % upcomingHighlights.length;
       setCurrentHighlighEvent(upcomingHighlights[updatedIndex]);
@@ -101,10 +101,10 @@ export default function UpcomingEvent(props: UpcomingEventProps) {
    */
   function onPrevHighlightEvent() {
     if (!upcomingHighlights || upcomingHighlights.length === 0) return;
-    
+
     // Reset auto-advance timer when user interacts
     resetAutoAdvance();
-    
+
     setHighlighyIndex((prevIndex) => {
       let updatedIndex = (prevIndex - 1) % upcomingHighlights.length;
 
@@ -124,12 +124,12 @@ export default function UpcomingEvent(props: UpcomingEventProps) {
    */
   const startAutoAdvance = useCallback(() => {
     if (!upcomingHighlights || upcomingHighlights.length <= 1) return;
-    
+
     // Clear any existing interval
     if (autoAdvanceIntervalRef.current) {
       clearInterval(autoAdvanceIntervalRef.current);
     }
-    
+
     autoAdvanceIntervalRef.current = setInterval(() => {
       setHighlighyIndex((prevIndex) => {
         const updatedIndex = (prevIndex + 1) % upcomingHighlights.length;
@@ -155,7 +155,7 @@ export default function UpcomingEvent(props: UpcomingEventProps) {
   /************** Auto-advance for highlights (mobile & desktop) *********************/
   useEffect(() => {
     if (!upcomingHighlights || upcomingHighlights.length <= 1) return;
-    
+
     // Start auto-advance on mount
     startAutoAdvance();
 
@@ -169,6 +169,8 @@ export default function UpcomingEvent(props: UpcomingEventProps) {
   }, [upcomingHighlights, startAutoAdvance]);
 
   const hasHighlights = upcomingHighlights && upcomingHighlights.length > 0;
+  const hasMultipleHighlights = upcomingHighlights && upcomingHighlights.length > 1;
+  const hasMultipleEvents = upcomingEvents && upcomingEvents.length > 1;
 
   return (
     <section id='events' className="w-full relative overflow-hidden bg-[#050505]">
@@ -176,40 +178,42 @@ export default function UpcomingEvent(props: UpcomingEventProps) {
       <div className="relative h-screen w-full flex items-center justify-center overflow-hidden pt-[68px] lg:pt-0">
         {/* Background Image with slow zoom */}
         <div className="absolute inset-0 hover-slow-zoom">
-          <img 
-            src={currentHighlightEvent?.image || "/highlight_background1.JPG"} 
-            alt="Featured Event" 
-            className="h-full w-full object-cover" 
+          <img
+            src={currentHighlightEvent?.image || "/highlight_background1.JPG"}
+            alt="Featured Event"
+            className="h-full w-full object-cover"
           />
         </div>
-        
+
         {/* Dark gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/60 to-[#050505]/30 z-[1]" />
-        
+
         {/* Film grain texture */}
-        <div className="absolute inset-0 z-[2] opacity-[0.03] pointer-events-none" 
-             style={{backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`}} 
+        <div className="absolute inset-0 z-[2] opacity-[0.03] pointer-events-none"
+          style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")` }}
         />
 
         {/* Vignette */}
-        <div className="absolute inset-0 z-[2] pointer-events-none" 
-             style={{background: 'radial-gradient(ellipse at center, transparent 40%, rgba(5, 5, 5, 0.7) 100%)'}} 
+        <div className="absolute inset-0 z-[2] pointer-events-none"
+          style={{ background: 'radial-gradient(ellipse at center, transparent 40%, rgba(5, 5, 5, 0.7) 100%)' }}
         />
 
         {/* Hero Content */}
         {hasHighlights ? (
           <div className="relative z-[3] w-full max-w-7xl mx-auto px-4 pb-8 md:px-6 lg:px-16 lg:pb-12 h-full flex flex-col justify-center">
-            {/* Navigation Arrows - Desktop */}
-            <button 
-              onClick={onPrevHighlightEvent}
-              className="hidden lg:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-[50] w-12 h-12 border border-[#c9a962]/30 hover:border-[#c9a962] bg-[#050505]/60 backdrop-blur-sm items-center justify-center transition-all duration-500 group pointer-events-auto"
-              aria-label="Previous event"
-            >
-              <svg className="w-5 h-5 text-[#c9a962] group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            
+            {/* Navigation Arrows - Desktop - Only show if more than 1 highlight */}
+            {hasMultipleHighlights && (
+              <button
+                onClick={onPrevHighlightEvent}
+                className="hidden lg:flex absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 z-[50] w-12 h-12 border border-[#c9a962]/30 hover:border-[#c9a962] bg-[#050505]/60 backdrop-blur-sm items-center justify-center transition-all duration-500 group pointer-events-auto"
+                aria-label="Previous event"
+              >
+                <svg className="w-5 h-5 text-[#c9a962] group-hover:-translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+            )}
+
             {/* Content Container - Lower z-index to ensure buttons are clickable */}
             <div className="relative z-[10] w-full">
               {currentHighlightEvent && (
@@ -217,6 +221,9 @@ export default function UpcomingEvent(props: UpcomingEventProps) {
                   <HighlightEventContainer
                     title={currentHighlightEvent?.title}
                     date={currentHighlightEvent?.date}
+                    endTime={currentHighlightEvent?.endTime}
+                    timezone={currentHighlightEvent?.timezone}
+                    location={currentHighlightEvent?.location}
                     image={currentHighlightEvent?.image}
                     priority={currentHighlightEvent?.priority}
                     organizer={currentHighlightEvent?.organizer}
@@ -226,38 +233,43 @@ export default function UpcomingEvent(props: UpcomingEventProps) {
                 </div>
               )}
             </div>
-            
-            <button 
-              onClick={onNextHighlightEvent}
-              className="hidden lg:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-[50] w-12 h-12 border border-[#c9a962]/30 hover:border-[#c9a962] bg-[#050505]/60 backdrop-blur-sm items-center justify-center transition-all duration-500 group pointer-events-auto"
-              aria-label="Next event"
-            >
-              <svg className="w-5 h-5 text-[#c9a962] group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
 
-            {/* Mobile Navigation - Positioned at bottom with high z-index */}
-            <div className="flex lg:hidden justify-center gap-4 mt-auto mb-8 z-[50] relative pointer-events-auto">
-              <button 
-                onClick={onPrevHighlightEvent}
-                className="w-12 h-12 border border-[#c9a962]/30 hover:border-[#c9a962] bg-[#050505]/80 backdrop-blur-sm flex items-center justify-center transition-all duration-500"
-                aria-label="Previous event"
-              >
-                <svg className="w-5 h-5 text-[#c9a962]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button 
+            {/* Next Button - Desktop - Only show if more than 1 highlight */}
+            {hasMultipleHighlights && (
+              <button
                 onClick={onNextHighlightEvent}
-                className="w-12 h-12 border border-[#c9a962]/30 hover:border-[#c9a962] bg-[#050505]/80 backdrop-blur-sm flex items-center justify-center transition-all duration-500"
+                className="hidden lg:flex absolute right-4 lg:right-8 top-1/2 -translate-y-1/2 z-[50] w-12 h-12 border border-[#c9a962]/30 hover:border-[#c9a962] bg-[#050505]/60 backdrop-blur-sm items-center justify-center transition-all duration-500 group pointer-events-auto"
                 aria-label="Next event"
               >
-                <svg className="w-5 h-5 text-[#c9a962]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-5 h-5 text-[#c9a962] group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
-            </div>
+            )}
+
+            {/* Mobile Navigation - Only show if more than 1 highlight */}
+            {hasMultipleHighlights && (
+              <div className="flex lg:hidden justify-center gap-4 mt-auto mb-8 z-[50] relative pointer-events-auto">
+                <button
+                  onClick={onPrevHighlightEvent}
+                  className="w-12 h-12 border border-[#c9a962]/30 hover:border-[#c9a962] bg-[#050505]/80 backdrop-blur-sm flex items-center justify-center transition-all duration-500"
+                  aria-label="Previous event"
+                >
+                  <svg className="w-5 h-5 text-[#c9a962]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={onNextHighlightEvent}
+                  className="w-12 h-12 border border-[#c9a962]/30 hover:border-[#c9a962] bg-[#050505]/80 backdrop-blur-sm flex items-center justify-center transition-all duration-500"
+                  aria-label="Next event"
+                >
+                  <svg className="w-5 h-5 text-[#c9a962]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           /* No Highlights - Luxury Brand Hero */
@@ -280,8 +292,8 @@ export default function UpcomingEvent(props: UpcomingEventProps) {
       </div>
 
       {/**************** Upcoming Events Section ****************/}
-      <div 
-        ref={elementRef} 
+      <div
+        ref={elementRef}
         className={`relative w-full py-16 lg:py-24 bg-[#050505] ${isVisible ? "animate-fade-in-up" : "opacity-0"}`}
       >
         {/* Section Header */}
@@ -293,31 +305,36 @@ export default function UpcomingEvent(props: UpcomingEventProps) {
         {/* Mobile Carousel */}
         {upcomingEvents && upcomingEvents.length > 0 && (
           <div className='relative w-full lg:hidden flex flex-col items-center px-6 gap-6'>
-            {/* Navigation */}
-            <div className="flex gap-4 mb-4">
-              <button 
-                onClick={onPrevMobileEvent}
-                className="w-12 h-12 border border-[#2a2a2a] hover:border-[#c9a962]/50 flex items-center justify-center transition-all duration-500"
-              >
-                <svg className="w-4 h-4 text-[#c9a962]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-                </svg>
-              </button>
-              <button 
-                onClick={onNextMobileEvent}
-                className="w-12 h-12 border border-[#2a2a2a] hover:border-[#c9a962]/50 flex items-center justify-center transition-all duration-500"
-              >
-                <svg className="w-4 h-4 text-[#c9a962]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
-            
+            {/* Navigation - Only show if more than 1 event */}
+            {hasMultipleEvents && (
+              <div className="flex gap-4 mb-4">
+                <button
+                  onClick={onPrevMobileEvent}
+                  className="w-12 h-12 border border-[#2a2a2a] hover:border-[#c9a962]/50 flex items-center justify-center transition-all duration-500"
+                >
+                  <svg className="w-4 h-4 text-[#c9a962]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={onNextMobileEvent}
+                  className="w-12 h-12 border border-[#2a2a2a] hover:border-[#c9a962]/50 flex items-center justify-center transition-all duration-500"
+                >
+                  <svg className="w-4 h-4 text-[#c9a962]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            )}
+
             {currentMobileEvent && (
               <EventContainer
                 key={currentMobileEvent?._id}
                 title={currentMobileEvent?.title}
                 date={currentMobileEvent?.date}
+                endTime={currentMobileEvent?.endTime}
+                timezone={currentMobileEvent?.timezone}
+                location={currentMobileEvent?.location}
                 image={currentMobileEvent?.image}
                 priority={currentMobileEvent?.priority}
                 organizer={currentMobileEvent?.organizer}
@@ -334,17 +351,20 @@ export default function UpcomingEvent(props: UpcomingEventProps) {
             {/* Fade edges */}
             <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#050505] to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none" />
-            
+
             <div className='flex gap-8 overflow-x-auto px-16 pb-4 scrollbar-thin'>
               {upcomingEvents.map((element, index) => (
-                <div 
-                  key={element?._id} 
+                <div
+                  key={element?._id}
                   className="flex-shrink-0 animate-fade-in"
                   style={{ animationDelay: `${index * 100}ms` }}
                 >
                   <EventContainer
                     title={element?.title}
                     date={element?.date}
+                    endTime={element?.endTime}
+                    timezone={element?.timezone}
+                    location={element?.location}
                     image={element?.image}
                     priority={element?.priority}
                     organizer={element?.organizer}

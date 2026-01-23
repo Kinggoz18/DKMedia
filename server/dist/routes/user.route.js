@@ -41,6 +41,12 @@ export class UserRoute {
             const getUserRoute = {
                 method: 'GET',
                 url: `/:id`,
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     params: RequestQueryValidation,
                     response: IReply.$schema
@@ -50,6 +56,12 @@ export class UserRoute {
             const logoutUserRoute = {
                 method: 'GET',
                 url: `/`,
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.logoutUser(request, reply)
             };
             const loginUserRoute = {
@@ -57,7 +69,7 @@ export class UserRoute {
                 url: `/google/callback`,
                 config: {
                     rateLimit: {
-                        max: 10, //5 login attempts
+                        max: 5, //5 login attempts
                         timeWindow: 5 * 1000 * 60 //5 minutes 
                     }
                 },
@@ -84,6 +96,13 @@ export class UserRoute {
             const deleteUserRoute = {
                 method: 'DELETE',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
+                preHandler: this.protectMiddleware,
                 handler: (request, reply) => this.service.deleteUser(request, reply)
             };
             const authenticateSignupCodeRoute = {
@@ -100,6 +119,12 @@ export class UserRoute {
             const confirmAuthorizedUserRoute = {
                 method: 'GET',
                 url: `/confirm`,
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     response: IReply.$schema,
                 },

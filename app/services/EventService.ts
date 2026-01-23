@@ -24,8 +24,7 @@ class EventService {
       }
       return response.data as IEvent[];
     } catch (error: any) {
-      console.log({ error })
-      throw new Error(error?.response?.data?.data ?? error?.response?.data?.messageerror?.message ?? error)
+      throw new Error(error?.response?.data?.data ?? error?.response?.data?.message ?? error?.message ?? error)
     }
   }
 
@@ -40,8 +39,7 @@ class EventService {
       }
       return response.data as IEvent
     } catch (error: any) {
-      console.log({ error })
-      throw new Error(error?.response?.data?.data ?? error?.response?.data?.messageerror?.message ?? error)
+      throw new Error(error?.response?.data?.data ?? error?.response?.data?.message ?? error?.message ?? error)
     }
   }
 

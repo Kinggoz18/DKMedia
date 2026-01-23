@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import IOrganizer from "@/lib/interfaces/Redux/IOrganizer";
 import { AddEventPopupProps } from "@/lib/interfaces/AddEventPopupProps";
 import OrganizerService from "@/lib/redux/Organizers/OrganizerService";
@@ -6,6 +6,9 @@ import { EventPriority } from "@/lib/enums/eventPriority";
 import Exit from "./Exit";
 import PrimaryButton from "./PrimaryButton";
 import IEvent from "@/lib/interfaces/Redux/IEvent";
+import { TIMEZONES } from "@/lib/utils/timezones";
+import { isValidEventDate, isValidEndDate } from "@/lib/utils/validation";
+import ThrowAsyncError, { toggleError } from "./ThrowAsyncError";
 
 export default function AddEventPopup(props: AddEventPopupProps) {
   const {
@@ -21,18 +24,22 @@ export default function AddEventPopup(props: AddEventPopupProps) {
   const [organziers, setOrganizers] = useState<[IOrganizer]>([{ _id: "", name: "", logo: "" }]);
   const [eventTitle, setEventTitle] = useState("");
   const [eventDate, setEventDate] = useState("");
+  const [eventEndTime, setEventEndTime] = useState("");
+  const [eventTimezone, setEventTimezone] = useState("");
+  const [eventLocation, setEventLocation] = useState("");
   const [uploadedImage, setUploadedImage] = useState<File>();
   const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [ticketLink, setTicketLink] = useState("");
   const [eventPriority, setEventPriority] = useState<EventPriority>(EventPriority.default);
   const [selectedOrganizer, setSelectedOrganizer] = useState<IOrganizer>({ _id: "", name: "", logo: "" })
+  const errorRef = useRef<HTMLDivElement>(null);
+  const [responseError, setResponseError] = useState("");
 
   /**
    * Fetch all organizers
    */
   async function fetchOrganizers() {
     const response = await organizerService.getAllOrganizer();
-    console.log({ response })
     setOrganizers(response)
   }
 
@@ -40,12 +47,9 @@ export default function AddEventPopup(props: AddEventPopupProps) {
    * Handler to select organizer
    */
   function handleSelectOrganizer(id: string) {
-    console.log({ id, organziers })
     const safeOrganizers = Array.isArray(organziers) ? organziers : [];
     const selected = safeOrganizers.find((o) => o?._id === id);
-    console.log({ id, selected })
     if (!selected) {
-      console.log("Invalid selection");
       return;
     };
     setSelectedOrganizer(selected);
@@ -56,7 +60,6 @@ export default function AddEventPopup(props: AddEventPopupProps) {
    */
   function handleSelectEventPriority(priority: string) {
     if (!priority) {
-      console.log("Invalid selection");
       return;
     };
 
@@ -101,14 +104,25 @@ export default function AddEventPopup(props: AddEventPopupProps) {
   const isFormValid = (): boolean => {
     if (eventTitle == "" ||
       eventDate == "" ||
+      eventEndTime == "" ||
       uploadedImageUrl == "" ||
       eventPriority === EventPriority.default ||
       selectedOrganizer.logo == "" || selectedOrganizer.name == "")
       return false;
-    console.log({ eventTitle, eventDate, uploadedImageUrl, eventPriority, selectedOrganizerLogo: selectedOrganizer?.logo, selectedOrganizerName: selectedOrganizer?.name })
 
     return true;
   }
+
+  /**
+   * Internal error handler that also shows error in popup
+   */
+  const handleInternalError = (errorMsg: string) => {
+    setResponseError(errorMsg);
+    setTimeout(() => {
+      toggleError(errorRef);
+    }, 400);
+    handleThrowError(errorMsg);
+  };
 
   /**
    * Upload the event
@@ -117,23 +131,36 @@ export default function AddEventPopup(props: AddEventPopupProps) {
     try {
       if (!isFormValid()) {
         setIsUploading(false)
-        handleThrowError("Fill in all the missing fields")
+        handleInternalError("Fill in all the missing fields")
+        return;
+      }
+
+      // Validate event date is not in the past
+      if (!isValidEventDate(eventDate)) {
+        setIsUploading(false)
+        handleInternalError("Event date cannot be in the past")
+        return;
+      }
+
+      // Validate end date is after start date (required)
+      if (!isValidEndDate(eventDate, eventEndTime)) {
+        setIsUploading(false)
+        handleInternalError("End date must be after start date")
         return;
       }
 
       if (!isValidURL(ticketLink)) {
         setIsUploading(false)
-        handleThrowError("Please enter a valid URL")
+        handleInternalError("Please enter a valid URL")
         return;
       }
 
       if (!uploadedImage) {
         setIsUploading(false)
-        handleThrowError("Fill in all the missing fields")
+        handleInternalError("Fill in all the missing fields")
         return;
       };
 
-      console.log("sumbiting event")
       //Save the image
       const formData = new FormData();
       formData.append("media", uploadedImage);
@@ -144,6 +171,9 @@ export default function AddEventPopup(props: AddEventPopupProps) {
       const data: IEvent = {
         title: eventTitle,
         date: eventDate,
+        endTime: eventEndTime,
+        timezone: eventTimezone || undefined,
+        location: eventLocation || undefined,
         image: imageResponse,
         priority: eventPriority,
         organizer: selectedOrganizer,
@@ -154,10 +184,9 @@ export default function AddEventPopup(props: AddEventPopupProps) {
       setIsUploading(false)
       closePopup();
     } catch (error: any) {
-      console.log({ error })
       setIsUploading(false)
-      handleThrowError(error?.message)
-      closePopup();
+      handleInternalError(error?.message)
+      // Don't close popup on error so user can see the error message
     }
   }
 
@@ -204,11 +233,11 @@ export default function AddEventPopup(props: AddEventPopupProps) {
             />
           </div>
 
-          {/* Two column grid for date and ticket */}
+          {/* Two column grid for date and end time */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/***************** Event Date *************************/}
             <div className="flex flex-col gap-y-2">
-              <label htmlFor="EventDate" className="font-medium text-neutral-300 text-sm">Date & Time</label>
+              <label htmlFor="EventDate" className="font-medium text-neutral-300 text-sm">Start Date & Time</label>
               <input
                 name="EventDate"
                 type="datetime-local"
@@ -219,18 +248,67 @@ export default function AddEventPopup(props: AddEventPopupProps) {
               />
             </div>
 
-            {/***************** Event ticket link *************************/}
+            {/***************** Event End Time *************************/}
             <div className="flex flex-col gap-y-2">
-              <label htmlFor="TicketLink" className="font-medium text-neutral-300 text-sm">Ticket Link</label>
+              <label htmlFor="EventEndTime" className="font-medium text-neutral-300 text-sm">End Date & Time <span className="text-red-400">*</span></label>
               <input
-                name="TicketLink"
-                type="url"
-                placeholder="https://..."
-                value={ticketLink}
-                onChange={(e) => setTicketLink(e.target.value)}
+                name="EventEndTime"
+                type="datetime-local"
+                min={eventDate || currentDate}
+                value={eventEndTime}
+                onChange={(e) => setEventEndTime(e.target.value)}
+                disabled={!eventDate}
+                required
+                className="input-modern py-3 px-4 w-full rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              />
+            </div>
+          </div>
+
+          {/* Two column grid for timezone and location */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/***************** Event Timezone *************************/}
+            <div className="flex flex-col gap-y-2">
+              <label htmlFor="EventTimezone" className="font-medium text-neutral-300 text-sm">Timezone</label>
+              <select 
+                name="EventTimezone" 
+                value={eventTimezone}
+                onChange={(e) => setEventTimezone(e.target.value)} 
+                className="input-modern py-3 px-4 rounded-xl font-medium cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23666%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E')] bg-[length:12px] bg-[right_1rem_center] bg-no-repeat"
+              >
+                <option value="">Select timezone</option>
+                {TIMEZONES.map((tz) => (
+                  <option key={tz.value} value={tz.value}>
+                    {tz.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/***************** Event Location *************************/}
+            <div className="flex flex-col gap-y-2">
+              <label htmlFor="EventLocation" className="font-medium text-neutral-300 text-sm">Location (Optional)</label>
+              <input
+                name="EventLocation"
+                type="text"
+                placeholder="e.g., Miami, FL"
+                value={eventLocation}
+                onChange={(e) => setEventLocation(e.target.value)}
                 className="input-modern py-3 px-4 w-full rounded-xl font-medium"
               />
             </div>
+          </div>
+
+          {/* Ticket Link */}
+          <div className="flex flex-col gap-y-2">
+            <label htmlFor="TicketLink" className="font-medium text-neutral-300 text-sm">Ticket Link</label>
+            <input
+              name="TicketLink"
+              type="url"
+              placeholder="https://..."
+              value={ticketLink}
+              onChange={(e) => setTicketLink(e.target.value)}
+              className="input-modern py-3 px-4 w-full rounded-xl font-medium"
+            />
           </div>
 
           {/* Two column grid for priority and organizer */}
@@ -312,6 +390,13 @@ export default function AddEventPopup(props: AddEventPopupProps) {
           </button>
         </div>
       </div>
+
+      {/* Error Component - Higher z-index than popup */}
+      {/* <ThrowAsyncError
+        responseError={responseError}
+        errorRef={errorRef}
+        className="!bottom-[10%]"
+      /> */}
     </div>
   )
 }

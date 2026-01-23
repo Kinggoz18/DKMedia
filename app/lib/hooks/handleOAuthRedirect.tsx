@@ -44,7 +44,6 @@ const useHandleOAuthRedirect = (handleAuthErrorFunc: (errorMsg: string) => void)
 
     } catch (error: any) {
       handleAuthErrorFunc(error?.message);
-      console.log({ error })
     }
   };
 

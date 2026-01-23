@@ -5,5 +5,7 @@ export default interface IMedia {
   _id?: string;
   mediaType: mediaType;
   mediaLink: string;
-  eventTag?: IEvent
+  eventTag?: IEvent;
+  hashtags?: string[];
+  caption?: string;
 }

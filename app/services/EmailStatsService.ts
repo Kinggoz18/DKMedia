@@ -29,7 +29,6 @@ export default class EmailStatsService {
       }
       return response.data as EmailUsageStats;
     } catch (error: any) {
-      console.log({ error });
       throw new Error(error?.response?.data?.data ?? error?.response?.data?.message ?? error?.message ?? error);
     }
   }

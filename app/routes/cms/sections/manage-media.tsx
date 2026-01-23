@@ -17,11 +17,11 @@ export default function ManageMedia() {
   const [isUploadMediaPopup, setIsUploadMediaPopup] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
-  const [allMedia, setAllMedia] = useState<[IMedia]>([{
-    _id: "",
-    mediaType: mediaType.Default,
-    mediaLink: "",
-  }])
+  const [allMedia, setAllMedia] = useState<IMedia[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(20);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalMedia, setTotalMedia] = useState(0);
 
   const errorRef = useRef<HTMLDivElement>(null);
   const [responseError, setResponseError] = useState("");
@@ -47,7 +47,12 @@ export default function ManageMedia() {
     if (response !== "deleted successfuly") {
       handleThrowError("Failed to delete media")
     }
-    await fetchAllMedia()
+    // If we're on the last page and it becomes empty after deletion, go to previous page
+    if (currentPage > 1 && safeMedia.length === 1) {
+      setCurrentPage(currentPage - 1);
+    } else {
+      await fetchAllMedia(currentPage);
+    }
     setIsDeletePopup(false)
   }
 
@@ -80,21 +85,35 @@ export default function ManageMedia() {
   /**
    * Fetch all media
    */
-  async function fetchAllMedia() {
+  async function fetchAllMedia(page: number = 1) {
     try {
-      const response = await mediaService.getAllMedia();
-      setAllMedia(response);
+      const response = await mediaService.getAllMedia(page, itemsPerPage);
+      // Handle both old format (array) and new format (object with media and pagination)
+      if (Array.isArray(response)) {
+        setAllMedia(response);
+        setTotalMedia(response.length);
+        setTotalPages(1);
+      } else {
+        setAllMedia(response.media);
+        setTotalMedia(response.pagination.total);
+        setTotalPages(response.pagination.totalPages);
+      }
     } catch (error: any) {
-      console.log({ error });
       handleThrowError(error?.message ?? error);
+      setAllMedia([]);
+      setTotalMedia(0);
+      setTotalPages(1);
     }
   }
 
   useEffect(() => {
-    fetchAllMedia()
-  }, [])
+    fetchAllMedia(currentPage);
+  }, [currentPage])
 
-  const safeMedia = Array.isArray(allMedia) && allMedia.length > 0 && allMedia[0]?._id !== "" ? allMedia : [];
+  // Filter out any media with empty _id (placeholder data)
+  const safeMedia = Array.isArray(allMedia) 
+    ? allMedia.filter(media => media?._id && media._id !== "")
+    : [];
 
   return (<>
     {isUploading && (
@@ -111,7 +130,7 @@ export default function ManageMedia() {
       <div className='glass-card flex flex-col w-full flex-1 min-h-[400px] gap-y-4 rounded-xl p-5 lg:p-6'>
         <div className='flex items-center justify-between mb-2'>
           <h2 className='text-lg lg:text-xl font-bold text-white'>Uploaded Recaps</h2>
-          <span className="text-sm text-neutral-500">{safeMedia.length} items</span>
+          <span className="text-sm text-neutral-500">{totalMedia} items</span>
         </div>
         {safeMedia.length > 0 ? (
           <div className='w-full grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 overflow-y-auto flex-1 pb-4 scrollbar-thin'>
@@ -127,6 +146,29 @@ export default function ManageMedia() {
               </svg>
             </div>
             <p>No media uploaded yet</p>
+          </div>
+        )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-6 pt-6 border-t border-neutral-800/50">
+            <button
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 rounded-lg bg-neutral-800/50 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-700/50 transition-colors"
+            >
+              Previous
+            </button>
+            <span className="px-4 py-2 text-neutral-400 text-sm">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="px-4 py-2 rounded-lg bg-neutral-800/50 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-neutral-700/50 transition-colors"
+            >
+              Next
+            </button>
           </div>
         )}
       </div>

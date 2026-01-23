@@ -3,6 +3,15 @@
  * Creates luxury-themed HTML emails matching the website's aesthetic
  */
 
+/**
+ * Get the unsubscribe URL from environment variables
+ * Falls back to FRONTEND_URL or default localhost
+ */
+function getUnsubscribeUrl(): string {
+  const frontendUrl = process.env.FRONTEND_URL || process.env.SITE_URL || 'http://localhost:5173';
+  return `${frontendUrl}/unsubscribe`;
+}
+
 export interface EmailTemplateOptions {
   title?: string;
   heading?: string;
@@ -22,8 +31,8 @@ export function generateEmailTemplate(options: EmailTemplateOptions): string {
     heading,
     content,
     footerText = '𝐆𝐨𝐨𝐝 𝐦𝐮𝐬𝐢𝐜. 𝐆𝐫𝐞𝐚𝐭 𝐩𝐞𝐨𝐩𝐥𝐞. 𝐔𝐧𝐟𝐨𝐫𝐠𝐞𝐭𝐭𝐚𝐛𝐥𝐞 𝐧𝐢𝐠𝐡𝐭𝐬. ✨',
-    includeUnsubscribe = false,
-    unsubscribeUrl
+    includeUnsubscribe = true, // Default to true - always include unsubscribe link
+    unsubscribeUrl = getUnsubscribeUrl() // Default to environment-based URL
   } = options;
 
   // Convert content to email-friendly HTML if it's plain text
@@ -95,7 +104,7 @@ export function generateEmailTemplate(options: EmailTemplateOptions): string {
               </p>
               ${includeUnsubscribe && unsubscribeUrl ? `
               <p style="margin: 10px 0 0 0; font-family: 'Times New Roman', Georgia, serif; font-size: 11px; color: rgba(168, 168, 168, 0.5);">
-                <a href="${unsubscribeUrl}" style="color: rgba(201, 169, 98, 0.7); text-decoration: underline;">Unsubscribe</a>
+                <a href="${unsubscribeUrl}" style="color: rgba(201, 169, 98, 0.7); text-decoration: underline;">Unsubscribe from mailing list</a>
               </p>
               ` : ''}
               <p style="margin: 20px 0 0 0; font-family: 'Times New Roman', Georgia, serif; font-size: 11px; color: rgba(168, 168, 168, 0.4);">
@@ -184,7 +193,9 @@ export function generateContactInquiryEmail(data: {
   return generateEmailTemplate({
     heading: 'New Contact Inquiry',
     content: detailsHTML,
-    footerText: 'DKMedia305'
+    footerText: 'DKMedia305',
+    includeUnsubscribe: true,
+    unsubscribeUrl: getUnsubscribeUrl()
   });
 }
 
@@ -192,15 +203,21 @@ export function generateContactInquiryEmail(data: {
  * Generate plain text version of email (for fallback)
  */
 export function generatePlainTextEmail(options: EmailTemplateOptions): string {
-  const { heading, content, footerText } = options;
+  const { 
+    heading, 
+    content, 
+    footerText,
+    includeUnsubscribe = true,
+    unsubscribeUrl = getUnsubscribeUrl()
+  } = options;
   
   let text = heading ? `${heading}\n\n` : '';
   text += content.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
   text += `\n\n${footerText || 'DKMedia305'}`;
   text += `\n© ${new Date().getFullYear()} DKMedia305. All rights reserved.`;
   
-  if (options.includeUnsubscribe && options.unsubscribeUrl) {
-    text += `\n\nUnsubscribe: ${options.unsubscribeUrl}`;
+  if (includeUnsubscribe && unsubscribeUrl) {
+    text += `\n\nUnsubscribe from mailing list: ${unsubscribeUrl}`;
   }
   
   return text;

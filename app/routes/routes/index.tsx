@@ -148,14 +148,16 @@ export async function clientLoader({ request }: ClientLoaderFunctionArgs) {
   try {
     const [aboutUs, articles, allEvents, contact] = await Promise.allSettled([
       safeApiCall(() => aboutUsService.getAboutUs(), null),
-      safeApiCall(() => articlesService.getAllArticle(), [] as IArticle[]),
+      safeApiCall(() => articlesService.getAllArticle(1, 100), { articles: [] as IArticle[], pagination: { page: 1, limit: 100, total: 0, totalPages: 1 } }),
       safeApiCall(() => eventService.getAllEvents(), [] as IEvent[]),
       safeApiCall(() => contactService.getContacts(), null),
     ]);
 
     // Extract values from Promise.allSettled results
     const aboutUsResult = aboutUs.status === 'fulfilled' ? aboutUs.value : null;
-    const articlesResult = articles.status === 'fulfilled' ? articles.value : [] as IArticle[];
+    // Handle both old format (array) and new format (object with articles and pagination)
+    const articlesResponse = articles.status === 'fulfilled' ? articles.value : { articles: [] as IArticle[], pagination: { page: 1, limit: 100, total: 0, totalPages: 1 } };
+    const articlesResult = Array.isArray(articlesResponse) ? articlesResponse : articlesResponse.articles;
     const allEventsResult = allEvents.status === 'fulfilled' ? allEvents.value : [] as IEvent[];
     const contactResult = contact.status === 'fulfilled' ? contact.value : null;
 

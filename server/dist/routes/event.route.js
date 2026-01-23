@@ -40,6 +40,12 @@ export class EventRoute {
             const addEventRoute = {
                 method: 'POST',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     body: AddEventValidationSchema,
                     response: IReply.$schema,
@@ -53,6 +59,12 @@ export class EventRoute {
             const deleteEventRoute = {
                 method: 'DELETE',
                 url: '/:id',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     params: RequestQueryValidation,
                     response: IReply.$schema,
@@ -66,6 +78,12 @@ export class EventRoute {
             const getAllEventsRoute = {
                 method: 'GET',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.getAllEvents(request, reply)
             };
             /**
@@ -74,6 +92,12 @@ export class EventRoute {
             const getEventByIdRoute = {
                 method: 'GET',
                 url: '/:id',
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.getEventById(request, reply)
             };
             /**
@@ -82,6 +106,12 @@ export class EventRoute {
             const updateEventByIdRoute = {
                 method: 'PUT',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     body: UpdateEventValidationSchema,
                     response: IReply.$schema,
@@ -92,12 +122,24 @@ export class EventRoute {
             const uploadImageRoute = {
                 method: 'POST',
                 url: '/upload/image',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 preHandler: this.protectMiddleware,
                 handler: (request, reply) => this.service.uploadImage(request, reply)
             };
             const uploadVideoRoute = {
                 method: 'POST',
                 url: '/upload/video',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 preHandler: this.protectMiddleware,
                 handler: (request, reply) => this.service.uploadVideo(request, reply)
             };

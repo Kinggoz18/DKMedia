@@ -1,10 +1,13 @@
 import EventsProps from "@/lib/interfaces/EventsProps";
+import { formatDateInTimezone, formatTimeInTimezone } from "@/lib/utils/timezones";
 
 export default function Events(props: EventsProps) {
   const {
     _id,
     title,
     date,
+    endTime,
+    timezone,
     image,
     organizer,
     isUpcoming,
@@ -15,8 +18,12 @@ export default function Events(props: EventsProps) {
     return null;
   }
   
-  const datetime = date;
-  const [newDate, time] = datetime.split("T");
+  // Format date and time in the event's timezone (or UTC if not specified)
+  const eventTimezone = timezone || 'UTC';
+  const formattedDate = formatDateInTimezone(date, eventTimezone, 'short');
+  const formattedStartTime = formatTimeInTimezone(date, eventTimezone);
+  const formattedEndTime = endTime ? formatTimeInTimezone(endTime, eventTimezone) : null;
+  const timeDisplay = formattedEndTime ? `${formattedStartTime} - ${formattedEndTime}` : formattedStartTime;
 
   return (
     <div className='relative h-[280px] min-w-[260px] rounded-xl overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary-500/20'>
@@ -53,13 +60,9 @@ export default function Events(props: EventsProps) {
             <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
-            <span>{newDate}</span>
-            {time && (
-              <>
-                <span className="text-neutral-500">•</span>
-                <span>{time}</span>
-              </>
-            )}
+            <span>{formattedDate}</span>
+            <span className="text-neutral-500">•</span>
+            <span>{timeDisplay}</span>
           </div>
 
           {organizer && (

@@ -61,6 +61,12 @@ export class OrganizerRoute implements IRoute<OrganizerDocument> {
       const addOrganizerRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Body: AddOrganizerValidationType, Reply: IReplyType }> = {
         method: 'POST',
         url: '/',
+        config: {
+          rateLimit: {
+            max: 5,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         schema: {
           body: AddOrganizerValidationSchema,
           response: IReply.$schema,
@@ -75,6 +81,12 @@ export class OrganizerRoute implements IRoute<OrganizerDocument> {
       const deleteOrganizerRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: RequestQueryValidationType, Reply: IReplyType }> = {
         method: 'DELETE',
         url: '/:id',
+        config: {
+          rateLimit: {
+            max: 5,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         schema: {
           params: RequestQueryValidation,
           response: IReply.$schema,
@@ -89,6 +101,12 @@ export class OrganizerRoute implements IRoute<OrganizerDocument> {
       const getAllOrganizersRoute: RouteOptions<Server, IncomingMessage, ServerResponse> = {
         method: 'GET',
         url: '/',
+        config: {
+          rateLimit: {
+            max: 15,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         handler: (request, reply) => this.service.getAllOrganizer(request, reply)
       }
 
@@ -98,6 +116,12 @@ export class OrganizerRoute implements IRoute<OrganizerDocument> {
       const getOrganizerByIdRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: RequestQueryValidationType, Reply: IReplyType }> = {
         method: 'GET',
         url: '/:id',
+        config: {
+          rateLimit: {
+            max: 15,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         handler: (request, reply) => this.service.getOrganizerById(request, reply)
       }
 
@@ -107,6 +131,12 @@ export class OrganizerRoute implements IRoute<OrganizerDocument> {
       const updateOrganizerByIdRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Body: UpdateOrganizerValidationType, Reply: IReplyType }> = {
         method: 'PUT',
         url: '/',
+        config: {
+          rateLimit: {
+            max: 5,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         schema: {
           body: UpdateOrganizerValidationSchema,
           response: IReply.$schema,

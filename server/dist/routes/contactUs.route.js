@@ -48,6 +48,12 @@ export class ContactUsRoute {
             const deleteContactRoute = {
                 method: 'DELETE',
                 url: '/:id',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     params: RequestQueryValidation,
                     response: IReply.$schema,
@@ -58,16 +64,34 @@ export class ContactUsRoute {
             const getAllContactRoute = {
                 method: 'GET',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.getAllContact(request, reply)
             };
             const getContactInquiryByIdRoute = {
                 method: 'GET',
                 url: '/:id',
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.getContactInquiryById(request, reply)
             };
             const replyToInquiryRoute = {
                 method: 'POST',
                 url: '/:id/reply',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     params: RequestQueryValidation,
                     body: {

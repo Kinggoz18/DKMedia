@@ -1,19 +1,20 @@
 import { useAppDispatch, useAppSelector } from '@/lib/hooks/reduxHook';
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react';
 import { setIsNewsletterPopupOpen } from '@/lib/redux/NewsletterSlice';
 import { CheckboxCheckOtions } from '@/lib/interfaces/props/CheckboxContainerProps';
 import SubscriptionService from '@/services/SubscriptionService';
 import { ISubscriptionUpdate } from '@/lib/interfaces/ISubscription';
 import ThrowAsyncError, { toggleError } from './ThrowAsyncError';
 import FeedbackPopup, { toggleFeedback } from './FeedbackPopup';
+import { isValidEmail } from '@/lib/utils/validation';
 
 export default function Newsletter() {
   const newsletterStore = useAppSelector(state => state.newsletter);
   const subscriptionService = new SubscriptionService();
   const dispatch = useAppDispatch();
 
-  const errorRef = useRef(null);
-  const feedbackRef = useRef(null);
+  const errorRef = useRef<HTMLDivElement | null>(null);
+  const feedbackRef = useRef<HTMLDivElement | null>(null);
 
   const [responseError, setResponseError] = useState("");
   const [isAgreed, setIsAgreed] = useState(false);
@@ -22,21 +23,18 @@ export default function Newsletter() {
   const [lastname, setLastName] = useState("");
   const [email, setEmail] = useState("");
 
-  const isValidEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const isValid = emailRegex.test(email);
-    if (!isValid) {
-      handleThrowError("Please enter a valid email address");
-    }
-    return isValid;
-  };
-
   const isBtnActive = () => {
     return isAgreed && firstname !== "" && email !== "";
   }
 
   const onSubscribeClick = async () => {
-    if (!isBtnActive() || !isValidEmail(email)) return;
+    if (!isBtnActive()) return;
+    
+    // Validate email
+    if (!isValidEmail(email)) {
+      handleThrowError("Please enter a valid email address");
+      return;
+    }
 
     try {
       const data: ISubscriptionUpdate = {

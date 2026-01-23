@@ -9,6 +9,9 @@ export interface EventDocument extends Document {
   _id: ObjectId,
   title: string;
   date: string;
+  endTime?: string;
+  timezone?: string;
+  location?: string;
   image: string;
   priority: EventPriority;
   organizer: OrganizerValidationType;
@@ -18,6 +21,9 @@ export interface EventDocument extends Document {
 export const EventMongooseSchema = new Schema<EventDocument>({
   title: { type: String },
   date: { type: String },
+  endTime: { type: String },
+  timezone: { type: String },
+  location: { type: String },
   image: { type: String },
   priority: {
     type: String,
@@ -32,6 +38,9 @@ export const EventMongooseSchema = new Schema<EventDocument>({
 export const EventMongooseSubSchema = new Schema({
   title: { type: String },
   date: { type: String },
+  endTime: { type: String },
+  timezone: { type: String },
+  location: { type: String },
   image: { type: String },
   priority: {
     type: String,

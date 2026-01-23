@@ -115,6 +115,14 @@ class EmailService {
         }
     }
     /**
+     * Get the unsubscribe URL from environment variables
+     * Falls back to FRONTEND_URL or default localhost
+     */
+    getUnsubscribeUrl() {
+        const frontendUrl = process.env.FRONTEND_URL || process.env.SITE_URL || 'http://localhost:5173';
+        return `${frontendUrl}/unsubscribe`;
+    }
+    /**
      * Wrap content in DKMedia email template if not already wrapped
      * @param html - HTML content to wrap
      * @param subject - Email subject (used as heading if no heading detected)
@@ -139,7 +147,9 @@ class EmailService {
         }
         return generateEmailTemplate({
             heading,
-            content
+            content,
+            includeUnsubscribe: true,
+            unsubscribeUrl: this.getUnsubscribeUrl()
         });
     }
     /**

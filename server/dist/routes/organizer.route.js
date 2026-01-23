@@ -40,6 +40,12 @@ export class OrganizerRoute {
             const addOrganizerRoute = {
                 method: 'POST',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     body: AddOrganizerValidationSchema,
                     response: IReply.$schema,
@@ -53,6 +59,12 @@ export class OrganizerRoute {
             const deleteOrganizerRoute = {
                 method: 'DELETE',
                 url: '/:id',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     params: RequestQueryValidation,
                     response: IReply.$schema,
@@ -66,6 +78,12 @@ export class OrganizerRoute {
             const getAllOrganizersRoute = {
                 method: 'GET',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.getAllOrganizer(request, reply)
             };
             /**
@@ -74,6 +92,12 @@ export class OrganizerRoute {
             const getOrganizerByIdRoute = {
                 method: 'GET',
                 url: '/:id',
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.getOrganizerById(request, reply)
             };
             /**
@@ -82,6 +106,12 @@ export class OrganizerRoute {
             const updateOrganizerByIdRoute = {
                 method: 'PUT',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     body: UpdateOrganizerValidationSchema,
                     response: IReply.$schema,

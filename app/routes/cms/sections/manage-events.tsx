@@ -85,7 +85,6 @@ export default function ManageEvents() {
       const data = await eventService.getAllEvents();
       setAllEvents(data)
     } catch (error: any) {
-      console.log({ error })
       handleThrowError(error?.message)
 
     }

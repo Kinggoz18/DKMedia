@@ -13,7 +13,8 @@
     "build:all": "npm run build:client && npm run build:server",
     "start": "node server/dist/index.js",
     "rebuild": "npm run build:client && npm run build:server && npm start",
-    "vpsrebuild": "npm run build:client && npm run build:server && pm2 delete dk-media-app || true && NODE_OPTIONS='--max-old-space-size=450 --expose-gc' pm2 start server/dist/index.js --name 'dk-media-app' --max-memory-restart 550M",    "preview": "vite preview",
+    "vpsrebuild": "npm run build:client && npm run build:server && pm2 delete dk-media-app || true && NODE_OPTIONS='--max-old-space-size=450 --expose-gc' pm2 start server/dist/index.js --name 'dk-media-app' --max-memory-restart 550M",
+    "preview": "vite preview",
     "lint": "eslint ."
   },
   "dependencies": {
@@ -41,7 +42,8 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.10.1",
     "node-cron": "^3.0.3",
-    "nodemailer": "^6.9.16",
+    "nodemailer": "^7.0.12",
+    "obscenity": "^0.4.6",
     "passport-google-oauth20": "^2.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

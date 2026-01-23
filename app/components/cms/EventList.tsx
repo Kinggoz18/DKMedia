@@ -29,6 +29,8 @@ export function EventList(props: RenderEventsProps) {
         _id={element._id}
         title={element?.title}
         date={element?.date}
+        endTime={element?.endTime}
+        timezone={element?.timezone}
         image={element?.image}
         priority={element?.priority}
         organizer={element?.organizer}

@@ -32,6 +32,12 @@ export class ContactRoute {
             const addContactRoute = {
                 method: 'POST',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     body: UpdateContactValidationSchema,
                     response: IReply.$schema,
@@ -42,6 +48,12 @@ export class ContactRoute {
             const deleteContactRoute = {
                 method: 'DELETE',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 5,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 schema: {
                     response: IReply.$schema,
                 },
@@ -51,6 +63,12 @@ export class ContactRoute {
             const getAllContactRoute = {
                 method: 'GET',
                 url: '/',
+                config: {
+                    rateLimit: {
+                        max: 15,
+                        timeWindow: 5 * 1000 * 60 // 5 minutes
+                    }
+                },
                 handler: (request, reply) => this.service.getContact(request, reply)
             };
             /******************************************* Register Routes *******************************************/

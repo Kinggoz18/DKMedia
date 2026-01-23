@@ -62,6 +62,12 @@ export class EventRoute implements IRoute<EventDocument> {
       const addEventRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Body: AddEventValidationType, Reply: IReplyType }> = {
         method: 'POST',
         url: '/',
+        config: {
+          rateLimit: {
+            max: 5,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         schema: {
           body: AddEventValidationSchema,
           response: IReply.$schema,
@@ -76,6 +82,12 @@ export class EventRoute implements IRoute<EventDocument> {
       const deleteEventRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: RequestQueryValidationType, Reply: IReplyType }> = {
         method: 'DELETE',
         url: '/:id',
+        config: {
+          rateLimit: {
+            max: 5,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         schema: {
           params: RequestQueryValidation,
           response: IReply.$schema,
@@ -90,6 +102,12 @@ export class EventRoute implements IRoute<EventDocument> {
       const getAllEventsRoute: RouteOptions<Server, IncomingMessage, ServerResponse> = {
         method: 'GET',
         url: '/',
+        config: {
+          rateLimit: {
+            max: 15,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         handler: (request, reply) => this.service.getAllEvents(request, reply)
       }
 
@@ -99,6 +117,12 @@ export class EventRoute implements IRoute<EventDocument> {
       const getEventByIdRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Params: RequestQueryValidationType, Reply: IReplyType }> = {
         method: 'GET',
         url: '/:id',
+        config: {
+          rateLimit: {
+            max: 15,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         handler: (request, reply) => this.service.getEventById(request, reply)
       }
 
@@ -108,6 +132,12 @@ export class EventRoute implements IRoute<EventDocument> {
       const updateEventByIdRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Body: UpdateEventValidationType, Reply: IReplyType }> = {
         method: 'PUT',
         url: '/',
+        config: {
+          rateLimit: {
+            max: 5,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         schema: {
           body: UpdateEventValidationSchema,
           response: IReply.$schema,
@@ -119,6 +149,12 @@ export class EventRoute implements IRoute<EventDocument> {
       const uploadImageRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Body: AddEventValidationType }> = {
         method: 'POST',
         url: '/upload/image',
+        config: {
+          rateLimit: {
+            max: 5,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         preHandler: this.protectMiddleware,
         handler: (request, reply) => this.service.uploadImage(request, reply)
       }
@@ -126,6 +162,12 @@ export class EventRoute implements IRoute<EventDocument> {
       const uploadVideoRoute: RouteOptions<Server, IncomingMessage, ServerResponse, { Body: AddEventValidationType }> = {
         method: 'POST',
         url: '/upload/video',
+        config: {
+          rateLimit: {
+            max: 5,
+            timeWindow: 5 * 1000 * 60 // 5 minutes
+          }
+        },
         preHandler: this.protectMiddleware,
         handler: (request, reply) => this.service.uploadVideo(request, reply)
       }

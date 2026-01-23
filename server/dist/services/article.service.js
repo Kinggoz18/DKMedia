@@ -73,8 +73,29 @@ export class ArticleService {
         };
         this.getAllArticle = async (request, reply) => {
             try {
-                const allArticles = await this.dbCollection.find({}).toArray();
-                return reply.status(200).send({ data: allArticles, success: true });
+                const page = parseInt(request.query.page || '1', 10);
+                const limit = parseInt(request.query.limit || '20', 10);
+                const skip = (page - 1) * limit;
+                const [articles, total] = await Promise.all([
+                    this.dbCollection.find({})
+                        .sort({ createdAt: -1 })
+                        .skip(skip)
+                        .limit(limit)
+                        .toArray(),
+                    this.dbCollection.countDocuments({})
+                ]);
+                return reply.status(200).send({
+                    success: true,
+                    data: {
+                        articles,
+                        pagination: {
+                            page,
+                            limit,
+                            total,
+                            totalPages: Math.ceil(total / limit)
+                        }
+                    }
+                });
             }
             catch (error) {
                 request.log.error(error?.message);

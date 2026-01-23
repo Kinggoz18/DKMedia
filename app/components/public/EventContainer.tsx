@@ -1,15 +1,22 @@
 import { forwardRef } from 'react';
 import EventContainerProps from '@/lib/interfaces/props/EventContainerProps';
+import { formatTimeInTimezone, formatDateInTimezone } from '@/lib/utils/timezones';
 
-const formatDate = (date: string): string => {
-  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const formatStartTime = (startDate: string, timezone?: string): string => {
   try {
-    const newDate = new Date(date);
-    const day = newDate.getDate();
-    const month = months[newDate.getMonth()];
-    return `${month} ${day}`
+    const tz = timezone || 'UTC';
+    return formatTimeInTimezone(startDate, tz);
   } catch {
-    return date;
+    return '';
+  }
+}
+
+const formatEndTime = (endTime: string, timezone?: string): string => {
+  try {
+    const tz = timezone || 'UTC';
+    return formatTimeInTimezone(endTime, tz);
+  } catch {
+    return '';
   }
 }
 
@@ -17,13 +24,19 @@ const EventContainer = forwardRef<HTMLDivElement, EventContainerProps>((props, r
   const {
     title,
     date,
+    endTime,
+    timezone,
+    location,
     image,
     organizer,
     ticketLink
   } = props;
 
-  const [newDate, time] = date.split("T");
-  const formatedDate = formatDate(newDate);
+  // Format date in the event's timezone (or UTC if not specified)
+  const eventTimezone = timezone || 'UTC';
+  const formatedDate = formatDateInTimezone(date, eventTimezone, 'short');
+  const startTime = formatStartTime(date, timezone);
+  const endTimeFormatted = endTime ? formatEndTime(endTime, timezone) : null;
 
   function navigateToTicketLink() {
     window.open(ticketLink, '_blank');
@@ -52,15 +65,42 @@ const EventContainer = forwardRef<HTMLDivElement, EventContainerProps>((props, r
 
       {/* Content */}
       <div className="absolute inset-0 z-[4] flex flex-col justify-end p-6 lg:p-8">
-        {/* Date Badge */}
-        <div className="absolute top-6 left-6 text-luxury-sm text-xs tracking-[0.2em] text-[#a8a8a8]">
-          {formatedDate} {time && `• ${time}`}
+        {/* Date Badge with dark blurry background - Positioned to minimize obstruction */}
+        <div className="absolute top-4 left-4 right-auto max-w-[200px] sm:max-w-[220px] md:max-w-[240px] backdrop-blur-md bg-black/60 rounded-lg px-3 py-2.5 sm:px-4 sm:py-3 border border-white/10">
+          <div className="text-luxury-sm text-xs tracking-[0.2em] text-white">
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[#c9a962] text-[10px]">DATE:</span>
+              <span className="text-[10px]">{formatedDate}</span>
+            </div>
+            {startTime && (
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[#c9a962] text-[10px]">START:</span>
+                <span className="text-[10px]">{startTime}</span>
+              </div>
+            )}
+            {endTimeFormatted && (
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[#c9a962] text-[10px]">END:</span>
+                <span className="text-[10px]">{endTimeFormatted}</span>
+              </div>
+            )}
+            {location && (
+              <div className="flex items-center gap-2">
+                <svg className="w-3 h-3 text-[#c9a962] flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <span className="text-[10px] lowercase">{location}</span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Event Title */}
-        <h3 className="h3-luxury text-xl lg:text-2xl mb-4 line-clamp-2 leading-snug text-white">
+        <h3 className="h3-luxury text-xl lg:text-2xl mb-2 line-clamp-2 leading-snug text-white">
           {title}
         </h3>
+
 
         {/* Organizer */}
         {organizer && (

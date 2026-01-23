@@ -30,7 +30,6 @@ export class AuthService {
         throw new Error("Invalid signup mode")
       }
     } catch (error: any) {
-      console.log({ error })
       throw new Error(error?.response?.data?.data ?? error?.message ?? error)
     }
   }
