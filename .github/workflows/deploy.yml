@@ -1,5 +1,6 @@
-name: Deploy to DigitalOcean
+# This workflow is used to deploy the code to the DigitalOcean VPS
 
+name: Deploy to DigitalOcean
 on:
   push:
     branches: [ master ]
