@@ -48,7 +48,7 @@ jobs:
             EOF
             
             # 6. Install production dependencies and start
-            npm install --omit=dev
+            npm install
 
             # 8. Run the vpsrebuild script 
             npm run vpsrebuild
