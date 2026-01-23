@@ -16,15 +16,7 @@ jobs:
         with:
           node-version: '22'
           cache: 'npm'
-
-      - name: Install & Build
-        run: |
-          npm ci
-          npm run build
-        env:
-          NODE_ENV: production
-          VITE_API_URL: "/api/v1"
-
+          
       - name: Deploy & Restart via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
