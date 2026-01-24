@@ -39,7 +39,7 @@ export default function UploadedMedia(props: UploadedMediaWithPlayStateProps) {
           onClick={onMediaClick} 
           src={mediaLink} 
           alt={caption || "Media"} 
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 z-30"
         />
       ) : (
         <VideoPlayer

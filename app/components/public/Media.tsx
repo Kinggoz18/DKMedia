@@ -18,6 +18,7 @@ export default function Media(props: MediaPageProps) {
   const [totalPages, setTotalPages] = useState(1);
   const [totalMedia, setTotalMedia] = useState(0);
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
+  const [focusedMedia, setFocusedMedia] = useState<IMedia | null>(null);
 
   // Fetch media client-side
   useEffect(() => {
@@ -95,6 +96,46 @@ export default function Media(props: MediaPageProps) {
     { key: 'images' as const, label: 'Photos', icon: '📷' },
     { key: 'videos' as const, label: 'Videos', icon: '🎥' },
   ];
+
+  // Handle ESC key to close focus mode
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && focusedMedia) {
+        setFocusedMedia(null);
+        setPlayingVideoId(null);
+      }
+    };
+
+    if (focusedMedia) {
+      document.addEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'hidden';
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'unset';
+    };
+  }, [focusedMedia]);
+
+  const handleMediaClick = (media: IMedia) => {
+    setFocusedMedia(media);
+    // If this video is already playing, keep it playing in focus mode
+    if (media.mediaType === mediaType.Video) {
+      const videoId = media._id || media.mediaLink;
+      // Only set playing if it's already playing
+      if (playingVideoId === videoId) {
+        // Already playing, keep it that way
+      } else {
+        // Not playing, don't auto-start
+        setPlayingVideoId(null);
+      }
+    }
+  };
+
+  const handleCloseFocus = () => {
+    setFocusedMedia(null);
+    setPlayingVideoId(null);
+  };
 
   return (
     <section className="bg-[#0a0a0a] w-full min-h-screen relative pt-[100px] pb-20">
@@ -190,6 +231,7 @@ export default function Media(props: MediaPageProps) {
                 <div 
                   key={element?._id || index} 
                   className="relative aspect-square rounded-xl overflow-hidden group cursor-pointer bg-neutral-900"
+                  onClick={() => handleMediaClick(element)}
                 >
                   {element?.mediaType === mediaType.Image ? (
                     <img 
@@ -205,7 +247,7 @@ export default function Media(props: MediaPageProps) {
                       isPlaying={isPlaying}
                       onPlay={(id) => setPlayingVideoId(id)}
                       onPause={() => setPlayingVideoId(null)}
-                      className="w-full h-full"
+                      className="w-full h-full z-30"
                     />
                   )}
 
@@ -261,6 +303,88 @@ export default function Media(props: MediaPageProps) {
           </div>
         )}
       </div>
+
+      {/* Focus Mode Modal */}
+      {focusedMedia && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 lg:p-8"
+          onClick={handleCloseFocus}
+        >
+          {/* Close Button */}
+          <button
+            onClick={handleCloseFocus}
+            className="absolute top-4 right-4 lg:top-8 lg:right-8 z-50 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-sm flex items-center justify-center transition-all duration-300 hover:scale-110"
+            aria-label="Close focus mode"
+          >
+            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Media Container */}
+          <div 
+            className="relative w-full h-full max-w-7xl max-h-[90vh] flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {focusedMedia.mediaType === mediaType.Image ? (
+              <div className="relative w-full h-full flex flex-col items-center justify-center">
+                <img 
+                  src={focusedMedia.mediaLink} 
+                  alt={focusedMedia.caption || "Focused media"} 
+                  className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+                />
+                {/* Caption and Tags */}
+                {(focusedMedia.caption || (focusedMedia.hashtags && focusedMedia.hashtags.length > 0)) && (
+                  <div className="mt-6 max-w-4xl text-center">
+                    {focusedMedia.caption && (
+                      <p className="text-white text-lg lg:text-xl font-medium mb-3">{focusedMedia.caption}</p>
+                    )}
+                    {focusedMedia.hashtags && focusedMedia.hashtags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {focusedMedia.hashtags.map((tag: string) => (
+                          <span key={tag} className="px-3 py-1.5 rounded-full text-sm text-primary-400 bg-primary-500/10 border border-primary-500/30 text-white">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="relative w-full h-full flex flex-col items-center justify-center">
+                <div className="relative w-full max-w-6xl aspect-video bg-black rounded-lg overflow-hidden shadow-2xl">
+                  <VideoPlayer
+                    videoSrc={focusedMedia.mediaLink}
+                    videoId={focusedMedia._id || focusedMedia.mediaLink}
+                    isPlaying={playingVideoId === (focusedMedia._id || focusedMedia.mediaLink)}
+                    onPlay={(id) => setPlayingVideoId(id)}
+                    onPause={() => setPlayingVideoId(null)}
+                    className="w-full h-full"
+                  />
+                </div>
+                {/* Caption and Tags */}
+                {(focusedMedia.caption || (focusedMedia.hashtags && focusedMedia.hashtags.length > 0)) && (
+                  <div className="mt-6 max-w-4xl text-center">
+                    {focusedMedia.caption && (
+                      <p className="text-white text-lg lg:text-xl font-medium mb-3">{focusedMedia.caption}</p>
+                    )}
+                    {focusedMedia.hashtags && focusedMedia.hashtags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 justify-center">
+                        {focusedMedia.hashtags.map((tag: string) => (
+                          <span key={tag} className="px-3 py-1.5 rounded-full text-sm text-primary-400 bg-primary-500/10 border border-primary-500/30">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   )
 }
