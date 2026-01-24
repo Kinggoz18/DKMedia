@@ -340,11 +340,11 @@ export default function Media(props: MediaPageProps) {
                       <p className="text-white text-lg lg:text-xl font-medium mb-3">{focusedMedia.caption}</p>
                     )}
                     {focusedMedia.hashtags && focusedMedia.hashtags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 justify-center">
+                      <div className="flex flex-wrap gap-2 justify-center text-primary-500">
                         {focusedMedia.hashtags.map((tag: string) => (
-                          <span key={tag} className="px-3 py-1.5 rounded-full text-sm text-primary-400 bg-primary-500/10 border border-primary-500/30 text-white">
+                          <p key={tag} className="px-3 py-1.5 rounded-full text-sm bg-primary-500/10 border border-primary-500/30 text-primary-500">
                             #{tag}
-                          </span>
+                          </p>
                         ))}
                       </div>
                     )}
@@ -370,11 +370,11 @@ export default function Media(props: MediaPageProps) {
                       <p className="text-white text-lg lg:text-xl font-medium mb-3">{focusedMedia.caption}</p>
                     )}
                     {focusedMedia.hashtags && focusedMedia.hashtags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 justify-center">
+                      <div className="flex flex-wrap gap-2 justify-center text-primary-500">
                         {focusedMedia.hashtags.map((tag: string) => (
-                          <span key={tag} className="px-3 py-1.5 rounded-full text-sm text-primary-400 bg-primary-500/10 border border-primary-500/30">
+                          <p key={tag} className="px-3 py-1.5 rounded-full text-sm bg-primary-500/10 border border-primary-500/30 text-primary-500">
                             #{tag}
-                          </span>
+                          </p>
                         ))}
                       </div>
                     )}
