@@ -1,24 +1,40 @@
 import MediaProps from "@/lib/interfaces/MediaProps";
 import DeleteIconBtn from "./DeleteIconBtn";
+import VideoPlayer from "@/components/shared/VideoPlayer";
+import { mediaType } from "@/lib/enums/mediaType";
 
-export default function UploadedMedia(props: MediaProps) {
+interface UploadedMediaWithPlayStateProps extends MediaProps {
+  isPlaying?: boolean;
+  onPlay?: (videoId: string) => void;
+  onPause?: () => void;
+}
+
+export default function UploadedMedia(props: UploadedMediaWithPlayStateProps) {
   const {
-    mediaType,
+    _id,
+    mediaType: type,
     mediaLink,
     eventTag,
     onDeleteClick,
     hashtags,
     caption,
+    isPlaying = false,
+    onPlay,
+    onPause,
   } = props;
 
   function onMediaClick() {
-    window.open(mediaLink, '_blank');
+    if (type === mediaType.Image) {
+      window.open(mediaLink, '_blank');
+    }
   }
+
+  const videoId = _id || mediaLink;
 
   return (
     <div className='relative aspect-square rounded-xl overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl hover:shadow-primary-500/10'>
       {/* Media */}
-      {mediaType === "Image" ? (
+      {type === mediaType.Image ? (
         <img 
           onClick={onMediaClick} 
           src={mediaLink} 
@@ -26,10 +42,13 @@ export default function UploadedMedia(props: MediaProps) {
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
       ) : (
-        <video 
-          onClick={onMediaClick} 
-          src={mediaLink} 
-          className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+        <VideoPlayer
+          videoSrc={mediaLink}
+          videoId={videoId}
+          isPlaying={isPlaying}
+          onPlay={onPlay || (() => {})}
+          onPause={onPause || (() => {})}
+          className="absolute inset-0 w-full h-full"
         />
       )}
 
@@ -37,17 +56,19 @@ export default function UploadedMedia(props: MediaProps) {
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
       {/* Content Overlay */}
-      <div className="absolute inset-0 p-3 flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div className="absolute inset-0 p-3 flex flex-col justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
         {/* Top - Media Type Badge & Delete */}
         <div className="flex justify-between items-start">
           <span className={`px-2 py-1 rounded-md text-xs font-semibold ${
-            mediaType === "Image" 
+            type === mediaType.Image 
               ? "bg-blue-500/80 text-white" 
               : "bg-purple-500/80 text-white"
           }`}>
-            {mediaType === "Image" ? "📷" : "🎬"} {mediaType}
+            {type === mediaType.Image ? "📷" : "🎬"} {type}
           </span>
-          <DeleteIconBtn onDeleteClick={onDeleteClick} className="!relative !right-0 !bg-red-500/80 hover:!bg-red-600 !rounded-lg" />
+          {onDeleteClick && (
+            <DeleteIconBtn onDeleteClick={onDeleteClick} className="!relative !right-0 !bg-red-500/80 hover:!bg-red-600 !rounded-lg" />
+          )}
         </div>
 
         {/* Bottom - Caption & Hashtags */}
@@ -67,17 +88,6 @@ export default function UploadedMedia(props: MediaProps) {
           )}
         </div>
       </div>
-
-      {/* Play Icon for Videos */}
-      {mediaType === "Video" && (
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-            <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

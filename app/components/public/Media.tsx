@@ -3,6 +3,7 @@ import MediaPageProps from "@/lib/interfaces/props/MediaPageProps";
 import { useState, useMemo, useEffect } from "react";
 import MediaService from "@/services/MediaService";
 import IMedia from "@/lib/interfaces/IMedia";
+import VideoPlayer from "@/components/shared/VideoPlayer";
 
 export default function Media(props: MediaPageProps) {
   const { initialTag } = props;
@@ -16,6 +17,7 @@ export default function Media(props: MediaPageProps) {
   const [itemsPerPage] = useState(20);
   const [totalPages, setTotalPages] = useState(1);
   const [totalMedia, setTotalMedia] = useState(0);
+  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
 
   // Fetch media client-side
   useEffect(() => {
@@ -180,53 +182,49 @@ export default function Media(props: MediaPageProps) {
       <div className="px-4 lg:px-10">
         {filteredMedia.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 lg:gap-4">
-            {filteredMedia.map((element, index) => (
-              <div 
-                key={element?._id || index} 
-                className="relative aspect-square rounded-xl overflow-hidden group cursor-pointer bg-neutral-900"
-              >
-                {element?.mediaType === mediaType.Image ? (
-                  <img 
-                    src={element?.mediaLink} 
-                    alt={element?.caption || `Recap ${index}`} 
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
-                    loading="lazy"
-                  />
-                ) : (
-                  <video
-                    controls
-                    preload="metadata"
-                    playsInline
-                    className="w-full h-full object-cover"
-                  >
-                    <source src={`${element?.mediaLink}#t=0.1`} type="video/mp4" />
-                  </video>
-                )}
+            {filteredMedia.map((element, index) => {
+              const videoId = element?._id || element?.mediaLink || `video-${index}`;
+              const isPlaying = playingVideoId === videoId;
 
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
-                  {element?.caption && (
-                    <p className="text-white text-sm font-medium line-clamp-2 mb-2">{element.caption}</p>
+              return (
+                <div 
+                  key={element?._id || index} 
+                  className="relative aspect-square rounded-xl overflow-hidden group cursor-pointer bg-neutral-900"
+                >
+                  {element?.mediaType === mediaType.Image ? (
+                    <img 
+                      src={element?.mediaLink} 
+                      alt={element?.caption || `Recap ${index}`} 
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                      loading="lazy"
+                    />
+                  ) : (
+                    <VideoPlayer
+                      videoSrc={element?.mediaLink}
+                      videoId={videoId}
+                      isPlaying={isPlaying}
+                      onPlay={(id) => setPlayingVideoId(id)}
+                      onPause={() => setPlayingVideoId(null)}
+                      className="w-full h-full"
+                    />
                   )}
-                  {element?.hashtags && element.hashtags.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {element.hashtags.slice(0, 3).map((tag: string) => (
-                        <span key={tag} className="text-xs text-primary-400">#{tag}</span>
-                      ))}
-                    </div>
-                  )}
-                </div>
 
-                {/* Video Indicator */}
-                {element?.mediaType === mediaType.Video && (
-                  <div className="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 flex items-center justify-center">
-                    <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3 z-20">
+                    {element?.caption && (
+                      <p className="text-white text-sm font-medium line-clamp-2 mb-2">{element.caption}</p>
+                    )}
+                    {element?.hashtags && element.hashtags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {element.hashtags.slice(0, 3).map((tag: string) => (
+                          <span key={tag} className="text-xs text-primary-400">#{tag}</span>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center">
