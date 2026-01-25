@@ -24,42 +24,29 @@ export default function Newsletter() {
   const [lastname, setLastName] = useState("");
   const [email, setEmail] = useState("");
 
-  // Client-only effect: Open newsletter after first render (Safari Private Mode safe)
-  // This runs after mount and does NOT depend on redux-persist rehydration
-  // Uses sessionStorage to show once per session, not on every page load
+  // Open newsletter after mount - doesn't block on redux-persist rehydration
+  // Uses sessionStorage to show once per session
   useEffect(() => {
-    // Only run on client, after initial render
     if (typeof window === 'undefined' || hasOpenedRef.current) return;
 
-    // If newsletter is already open (from manual trigger), mark as shown and return
     if (newsletterStore?.isOpen) {
       try {
         sessionStorage.setItem('newsletter_shown', 'true');
-      } catch {
-        // Ignore storage errors - non-critical
-      }
+      } catch {}
       hasOpenedRef.current = true;
       return;
     }
 
-    // Check sessionStorage to see if we've shown it this session
     let hasShownThisSession = false;
     try {
       hasShownThisSession = sessionStorage.getItem('newsletter_shown') === 'true';
-    } catch {
-      // Safari Private Mode or storage restrictions - proceed anyway
-    }
+    } catch {}
 
-    // Open newsletter if not shown this session
     if (!hasShownThisSession) {
-      // Mark as shown in sessionStorage (non-blocking)
       try {
         sessionStorage.setItem('newsletter_shown', 'true');
-      } catch {
-        // Ignore storage errors - non-critical
-      }
+      } catch {}
       
-      // Open the newsletter after a brief delay to ensure render is complete
       setTimeout(() => {
         dispatch(setIsNewsletterPopupOpen(true));
         hasOpenedRef.current = true;
@@ -67,7 +54,7 @@ export default function Newsletter() {
     } else {
       hasOpenedRef.current = true;
     }
-  }, []); // Empty deps - only run once on mount
+  }, []);
 
   const isBtnActive = () => {
     return isAgreed && firstname !== "" && email !== "";

@@ -41,8 +41,7 @@ export const EmailTransportMongooseSchema = new Schema<EmailTransportDocument>(
   { timestamps: true }
 );
 
-// Index for efficient queries on sentAt (for 24-hour rolling window)
-// Note: MongoDB TTL indexes will auto-delete after 24 hours
+// TTL index - auto-deletes after 24 hours
 EmailTransportMongooseSchema.index({ sentAt: 1 }, { expireAfterSeconds: 86400 });
 
 // Static method to get total recipients in the last 24 hours

@@ -11,7 +11,6 @@ import { CloudflareR2BucketManager } from "../services/CloudflareR2BucketManager
 import { createProtectMiddleware } from "../middlewares/protectMiddleware.js";
 import { AuthCodeDocument } from "../schema/authCode.js";
 import { UserDocument } from "../schema/user.js";
-//TODO: Test media tag
 
 export class UploadMediaRoute implements IRoute<UploadedMediaDocument> {
   service!: UploadedMediaService;

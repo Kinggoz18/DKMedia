@@ -10,11 +10,6 @@ export class AuthService {
     this.apiUrl = `${BACKEND_URL}/auth`;
   }
 
-  /**
-   * Login or signup a user
-   * @param mode signup/login
-   * @param signupCode Signup code
-   */
   async authenticateUser(mode: string, signupCode?: string) {
     try {
       if (mode === "signup" && signupCode) {
@@ -58,10 +53,7 @@ export class AuthService {
     }
   }
 
-  /**
-   * Confirm authorized user - checks if user's tokens are valid
-   * Used by CMS sections to verify authorization on navigation
-   */
+  // Used by CMS sections to verify auth on navigation
   async confirmAuthorizedUser() {
     try {
       const response = (await axios.get(`${this.apiUrl}/confirm`, getProtectedRequestConfig())).data as IResponse;
@@ -71,7 +63,6 @@ export class AuthService {
       }
       return response?.data;
     } catch (error: any) {
-      // If unauthorized, redirect to login
       if (error?.response?.status === 401) {
         window.location.href = "/auth";
         throw new Error("Unauthorized. Please login again.");

@@ -22,7 +22,6 @@ import EmailQueueWorker from './services/EmailQueueWorker.js';
 
 dotenv.config();
 
-// ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -46,12 +45,11 @@ const FRONTEND_URL = process.env.FRONTEND_URL ?? "http://localhost:5173";
 const CRM_FRONTEND_URL = process.env.CRM_FRONTEND_URL ?? "http://localhost:5173";
 const NODE_ENV = process.env.NODE_ENV ?? "development"
 
-// ****************************************************** END OF TESTS ****************************************************** //
 const connectToDatabase = async () => {
   try {
     if (MONGODB_URL === "" || !MONGODB_URL) throw new Error("MongoDb URL is undefined");
 
-    // Connect Mongoose (needed for EmailTransportModel and ScheduledEmailModel)
+    // Mongoose for EmailTransportModel and ScheduledEmailModel
     if (mongoose.connection.readyState === 0) {
       await mongoose.connect(MONGODB_URL);
     }
@@ -59,7 +57,6 @@ const connectToDatabase = async () => {
     const client = await mongodb.MongoClient.connect(MONGODB_URL);
     if (!client) throw new Error("Something went wrong while trying to connect to Mongodb");
 
-    // Add mongodb plugin
     await server.register(fastifyMongodb, {
       forceClose: true,
       client: client
@@ -80,16 +77,13 @@ export const startServer = async (server: FastifyInstance) => {
     const database = server.mongo.client.db(DATABASE_NAME);
     if (!database) throw new Error("Failed to load database");
 
-    // Start email queue worker (RabbitMQ consumer)
     const emailWorker = new EmailQueueWorker(server.log);
     await emailWorker.start();
 
-    // Set up cookies
     await server.register(fastifyCookie, {
       secret: process.env.COOKIE_SECRET,
     });
 
-    // Set up cors
     await server.register(cors, {
       origin: NODE_ENV === "development" ? true : [FRONTEND_URL, CRM_FRONTEND_URL],
       methods: ['GET', 'POST', 'DELETE', 'PUT'],
@@ -97,21 +91,15 @@ export const startServer = async (server: FastifyInstance) => {
       credentials: true,
     })
 
-    //Set up multipart for file processing
     await server.register(fastifyMultipart, {
       limits: {
-        fileSize: 90 * 1024 * 1024, // 90MB file size limit
+        fileSize: 90 * 1024 * 1024, // 90MB
       },
     });
 
-    //Set up secure session 
-    // set up secure sessions for @fastify/passport to store data in
     server.register(fastifySecureSession, { key: fs.readFileSync(path.join(__dirname, 'secret-key')) })
-
-    //Set up passport
     PassportConfig(server, database)
 
-    //Set up rate limiting
     await server.register(fastifyRateLimit, {
       global: false,
       max: 100,
@@ -124,16 +112,11 @@ export const startServer = async (server: FastifyInstance) => {
       prefix: BASE_PATH,
     })
 
-    // Serve static assets from Remix build (MUST be before Remix handler)
-    // Root should be build/client (not build/client/assets) so /assets/* maps correctly
+    // Static assets must be registered before Remix handler
     const clientBuildPath = path.resolve(process.cwd(), 'build/client');
-
-    // Check if client build exists
     if (!fs.existsSync(clientBuildPath)) {
       throw new Error(`Client build not found at ${clientBuildPath}. Run 'npm run build:client' first.`);
     }
-
-    server.log.info(`Serving static files from: ${clientBuildPath}`);
 
     await server.register(fastifyStatic, {
       root: clientBuildPath,
@@ -142,72 +125,40 @@ export const startServer = async (server: FastifyInstance) => {
       decorateReply: false,
     });
 
-    // Load Remix server build
     const buildPath = path.resolve(process.cwd(), 'build/server/index.js');
-
-    // Check if builds exist
     if (!fs.existsSync(buildPath)) {
       throw new Error(`Remix server build not found at ${buildPath}. Run 'npm run build:client' first.`);
     }
 
-    if (!fs.existsSync(clientBuildPath)) {
-      throw new Error(`Client build not found at ${clientBuildPath}. Run 'npm run build:client' first.`);
-    }
-
-    // Check build freshness - compare server and client build timestamps
+    // Warn if builds are out of sync
     const serverBuildStats = fs.statSync(buildPath);
     const clientManifestPath = path.join(clientBuildPath, '.vite/manifest.json');
-
     if (fs.existsSync(clientManifestPath)) {
       const clientManifestStats = fs.statSync(clientManifestPath);
       if (clientManifestStats.mtime > serverBuildStats.mtime) {
-        server.log.warn('⚠️  WARNING: Client build is newer than server build!');
-        server.log.warn('⚠️  The server build may contain stale asset references.');
-        server.log.warn('⚠️  Please rebuild: npm run build:client');
+        server.log.warn('Client build is newer than server build - may have stale references');
       }
     }
 
-    server.log.info(`Loading Remix server build from: ${buildPath}`);
-    server.log.info(`Server build timestamp: ${serverBuildStats.mtime.toISOString()}`);
-
-    // Import the Remix server build
-    // Note: ES modules cache imports, so server must restart after rebuilds
-    // Use absolute path to ensure proper resolution
+    // ES modules cache imports, so we add timestamp to force re-read
     const absoluteBuildPath = path.resolve(buildPath);
-    // Use a timestamp to force Node to re-read the file from disk
     const buildUrl = `file://${absoluteBuildPath}?update=${Date.now()}`;
     const viteBuild = await import(buildUrl);
-    // Remix build exports the build as a default or named export
-    // Check what's actually exported
     const build = (viteBuild.default || viteBuild) as ServerBuild;
 
     if (!build || !build.assets) {
-      server.log.error('Invalid Remix build - missing build.assets');
       throw new Error('Failed to load Remix server build - invalid build structure');
     }
 
-    // Log some asset info for debugging
-    const assetKeys = Object.keys(build.assets);
-    const manifestAsset = assetKeys.find(key => key.includes('manifest'));
-    server.log.info(`Remix build loaded successfully with ${assetKeys.length} assets`);
-    if (manifestAsset) {
-      server.log.info(`Manifest asset: ${manifestAsset}`);
-    }
-
-    // Create Remix request handler
     const remixHandler = createRequestHandler(build, NODE_ENV);
 
-    // Handle all non-API routes with Remix SSR (catch-all, but after static files)
-    // Use setNotFoundHandler - fastify-static will handle static files first
+    // Catch-all for non-API routes (static files handled by fastifyStatic above)
     server.setNotFoundHandler(async (request, reply) => {
-      // Skip API routes
       if (request.url.startsWith(BASE_PATH)) {
         reply.code(404).send({ error: 'Not Found' });
         return;
       }
 
-      // Skip static asset requests - they should be handled by fastifyStatic
-      // If we reach here for /assets/*, it means the file doesn't exist
       if (request.url.startsWith('/assets/')) {
         server.log.warn(`Asset not found: ${request.url}`);
         reply.code(404).send({ error: 'Asset not found' });

@@ -35,13 +35,6 @@ export class EventService implements IService<EventDocument> {
     }
   }
 
-  /**
-   * Post an event to the database
-   * TODO: Test the maximum highlights logic
-   * @param request 
-   * @param reply 
-   * @returns 
-   */
   addEvent = async (request: FastifyRequest<{ Body: AddEventValidationType }>, reply: FastifyReply<{ Reply: IReplyType }>) => {
     try {
       const {

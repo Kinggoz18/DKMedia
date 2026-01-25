@@ -74,11 +74,9 @@ export class UserService implements IService<UserDocument> {
         // First time login - create new refresh token and auth code
         this.logger.debug('Not logged in. Generating both CSRF token and refresh token');
 
-        refreshToken = generateToken(userId, '7d', 'refreshToken'); // Expires in 7 days
-        rtExpiresAt = new Date(Date.now() + getExpiryTime('7d')); // 7 days expiry
+        refreshToken = generateToken(userId, '7d', 'refreshToken');
+        rtExpiresAt = new Date(Date.now() + getExpiryTime('7d'));
 
-        // Create auth code with refresh token using native MongoDB driver
-        // Note: createdAt and updatedAt are handled automatically by MongoDB timestamps
         const newAuthCode = {
           userId: userId,
           refreshToken: { code: refreshToken, expiryDate: rtExpiresAt }

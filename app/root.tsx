@@ -28,8 +28,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
       </head>
       <body>
         <Provider store={store}>
-          {/* PersistGate with loading={null} ensures app renders immediately without blocking on redux-persist rehydration */}
-          {/* This prevents Safari Private Mode hydration stalls from localStorage access delays */}
           <PersistGate loading={null} persistor={store.__persistor}>
             {children}
           </PersistGate>

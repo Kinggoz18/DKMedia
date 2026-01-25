@@ -8,12 +8,10 @@ interface RenderMediaProps {
   onDeleteClick: (id: string) => void;
 }
 
-//TODO: Complete event tag logic
 function MediaList(props: RenderMediaProps) {
   const { onDeleteClick, allMedia } = props;
   const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
 
-  // Ensure allMedia is always an array to prevent crashes
   const safeMedia = Array.isArray(allMedia) ? allMedia : [];
 
   const handlePlay = (videoId: string) => {

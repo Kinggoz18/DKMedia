@@ -65,7 +65,7 @@ export class SubscriptionRoute implements IRoute<SubscriptionDocument> {
           body: AddSubscriptionValidationSchema,
           response: IReply.$schema,
         },
-        // Note: This is a public endpoint (subscription from public site), not protected
+        // Public endpoint - no auth required
         handler: (request, reply) => this.service.addSubscription(request, reply)
       }
 

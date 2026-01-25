@@ -27,7 +27,6 @@ export const initAppRoutes = async (server: FastifyInstance, database: mongodb.D
     const newsletterHistoryRoute: NewsletterHistoryRoute = new NewsletterHistoryRoute(server, database, server.log);
     const emailRoute: EmailRoute = new EmailRoute(server, database, server.log);
 
-    /***************************************************** Initialize Routes *****************************************************/
     await authRoute.initRoutes();
     await eventRoute.initRoutes();
     await aboutUsRoute.initRoutes();
