@@ -10,7 +10,7 @@ function getApiBaseUrl(): string {
 
   if (isBrowser) {
     // Browser: use relative URL or VITE_API_URL if set
-    return import.meta.env.VITE_API_URL || '/api/v1';
+    return import.meta.env.VITE_API_URL || "https://www.dkmedia305.com/api/v1";
   } else {
     // Server: use internal API URL (localhost)
     return process.env.VITE_INTERNAL_API_URL || 'http://127.0.0.1:4000/api/v1';

@@ -7,7 +7,7 @@ import {
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
 import { Provider } from 'react-redux'
-import { PersistGate } from 'redux-persist/lib/integration/react.js'
+import { PersistGate } from 'redux-persist/integration/react'
 import { makeStore } from './lib/redux/rootStore'
 import stylesheet from "./index.css?url";
 

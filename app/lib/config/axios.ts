@@ -12,7 +12,7 @@ export const createApiClient = (): AxiosInstance => {
 
   // Determine base URL based on environment
   const baseURL = isBrowser
-    ? (import.meta.env.VITE_API_URL || '/api/v1')  // Browser: relative or VITE_API_URL
+    ? (import.meta.env.VITE_API_URL || "https://www.dkmedia305.com/api/v1")  // Browser: relative or VITE_API_URL
     : (process.env.VITE_INTERNAL_API_URL || 'http://127.0.0.1:4000/api/v1'); // Server: internal URL
 
   const apiClient = axios.create({
