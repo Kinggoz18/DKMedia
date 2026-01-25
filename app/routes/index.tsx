@@ -1,5 +1,5 @@
-import { useLoaderData } from "@remix-run/react";
-import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
+import { json, useLoaderData } from "@remix-run/react";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/node";
 import type { ClientLoaderFunctionArgs } from "@remix-run/react";
 import Header from '@/components/public/Header';
 import Newsletter from '@/components/public/Newsletter';
@@ -17,6 +17,11 @@ import IArticle from '@/lib/interfaces/IArticle';
 import IEvent from '@/lib/interfaces/IEvent';
 import { EventPriority } from '@/lib/enums/eventPriority';
 import { generateSEOMeta, generateEventStructuredData, generateOrganizationStructuredData, generateWebsiteStructuredData } from '@/lib/utils/seo';
+
+export const action = async ({ request }: ActionFunctionArgs) => {
+  // This satisfies the Remix requirement for POST requests to "/"
+  return Response.json({ ok: true });
+};
 
 // Helper functions moved outside loader for better structure
 function sortFunction(a: IEvent, b: IEvent): number {
