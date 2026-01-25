@@ -8,7 +8,9 @@ const defaultUserInfo: ISubscriptionUpdate = {
 }
 
 const initialState = {
-  isOpen: true,
+  // Changed to false to prevent render during initial hydration
+  // Newsletter will be opened via client-only effect after mount (Safari Private Mode safe)
+  isOpen: false,
   info: defaultUserInfo
 }
 
